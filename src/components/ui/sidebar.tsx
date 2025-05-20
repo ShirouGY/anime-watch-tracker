@@ -2,6 +2,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
 import { PanelLeft } from "lucide-react"
+import { Dispatch, SetStateAction } from "react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -33,6 +34,7 @@ type SidebarContext = {
   isMobile: boolean
   toggleSidebar: () => void
 }
+
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
 
@@ -160,6 +162,7 @@ const Sidebar = React.forwardRef<
     side?: "left" | "right"
     variant?: "sidebar" | "floating" | "inset"
     collapsible?: "offcanvas" | "icon" | "none"
+    onCollapsedChange?: Dispatch<SetStateAction<boolean>>
   }
 >(
   (
@@ -169,11 +172,18 @@ const Sidebar = React.forwardRef<
       collapsible = "offcanvas",
       className,
       children,
+      onCollapsedChange,
       ...props
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const { isMobile, state, openMobile, setOpenMobile, setOpen } = useSidebar()
+
+    React.useEffect(() => {
+      if (onCollapsedChange) {
+        onCollapsedChange(state === 'collapsed')
+      }
+    }, [state, onCollapsedChange])
 
     if (collapsible === "none") {
       return (

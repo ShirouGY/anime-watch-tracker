@@ -38,7 +38,7 @@ const LoginPage = () => {
             <BookOpen className="h-12 w-12 text-anime-purple" />
           </div>
           <CardTitle className="text-2xl font-bold anime-gradient-text">
-            MeuAnimeLista
+            AnimeList
           </CardTitle>
           <CardDescription>
             Entre para acessar suas listas de animes

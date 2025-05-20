@@ -54,11 +54,11 @@ export function AppSidebar() {
   ];
 
   return (
-    <Sidebar collapsed={collapsed} onCollapsedChange={setCollapsed} className="border-r">
+    <Sidebar onCollapsedChange={setCollapsed} className="border-r">
       <SidebarHeader className="flex justify-center items-center py-6">
         <Link to="/dashboard" className="w-full flex justify-center">
           {!collapsed ? (
-            <h1 className="text-xl font-bold anime-gradient-text">MeuAnimeLista</h1>
+            <h1 className="text-xl font-bold anime-gradient-text">AnimeList</h1>
           ) : (
             <BookOpen className="text-anime-purple" size={24} />
           )}

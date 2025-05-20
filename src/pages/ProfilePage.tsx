@@ -211,7 +211,7 @@ const ProfilePage = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Histórico de Atividades</CardTitle>
-                  <CardDescription>Suas ações recentes no MeuAnimeLista</CardDescription>
+                  <CardDescription>Suas ações recentes no AnimeList</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
