@@ -67,7 +67,7 @@ export function AddAnimeDialog({ onClose }: AddAnimeDialogProps) {
       image: getAnimeImageUrl(selectedAnime),
       episodes: selectedAnime.episodes || null,
       year: selectedAnime.year || null,
-      status: "plan_to_watch",
+      status: "plan_to_watch" as AnimeStatus,
       rating: null,
       notes: null,
     });
@@ -84,7 +84,7 @@ export function AddAnimeDialog({ onClose }: AddAnimeDialogProps) {
       image: values.image || null,
       episodes: values.episodes || null,
       year: values.year || null,
-      status: "plan_to_watch",
+      status: "plan_to_watch" as AnimeStatus,
       rating: null,
       notes: null,
     });

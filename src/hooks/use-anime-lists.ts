@@ -51,7 +51,7 @@ export const useAddAnime = () => {
   const { user } = useAuth();
   
   return useMutation({
-    mutationFn: async (newAnime: Omit<Anime, 'id' | 'created_at' | 'updated_at'>) => {
+    mutationFn: async (newAnime: Omit<Anime, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
       if (!user) throw new Error('User must be logged in');
       
       const { data, error } = await supabase
