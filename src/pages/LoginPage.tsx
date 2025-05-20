@@ -1,33 +1,43 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const { signIn, signInWithGoogle, user } = useAuth();
+
+  // If already logged in, redirect to dashboard
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // IMPORTANTE: Isso será implementado depois de conectar o Supabase
-    setTimeout(() => {
-      toast({
-        title: "Informação",
-        description: "A funcionalidade de login será implementada depois de conectar o Supabase.",
-      });
+    try {
+      await signIn(email, password);
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
       setIsLoading(false);
-      // Redirecionar para o dashboard temporariamente para demonstração
-      window.location.href = '/dashboard';
-    }, 1000);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      console.error('Google login error:', error);
+    }
   };
 
   return (
@@ -97,10 +107,7 @@ const LoginPage = () => {
               type="button" 
               variant="outline" 
               className="w-full"
-              onClick={() => toast({
-                title: "Google OAuth",
-                description: "Esta funcionalidade será implementada com o Supabase.",
-              })}
+              onClick={handleGoogleLogin}
             >
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path

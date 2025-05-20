@@ -25,10 +25,11 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function AppSidebar() {
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
+  const { signOut } = useAuth();
   
   const menuItems = [
     {
@@ -54,21 +55,16 @@ export function AppSidebar() {
   ];
 
   return (
-    <Sidebar collapsed={collapsed} onCollapsedChange={setCollapsed} className="border-r">
+    <Sidebar className="border-r">
       <SidebarHeader className="flex justify-center items-center py-6">
         <Link to="/dashboard" className="w-full flex justify-center">
-          {!collapsed ? (
-            <h1 className="text-xl font-bold anime-gradient-text">MeuAnimeLista</h1>
-          ) : (
-            <BookOpen className="text-anime-purple" size={24} />
-          )}
+          <h1 className="text-xl font-bold anime-gradient-text">MeuAnimeLista</h1>
         </Link>
       </SidebarHeader>
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className={cn("text-xs uppercase text-muted-foreground", 
-            collapsed ? "sr-only" : "")}>
+          <SidebarGroupLabel className="text-xs uppercase text-muted-foreground">
             Menu
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -94,8 +90,7 @@ export function AppSidebar() {
         </SidebarGroup>
         
         <SidebarGroup className="mt-4">
-          <SidebarGroupLabel className={cn("text-xs uppercase text-muted-foreground", 
-            collapsed ? "sr-only" : "")}>
+          <SidebarGroupLabel className="text-xs uppercase text-muted-foreground">
             Ações
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -104,16 +99,16 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90">
                   <Button className="w-full flex gap-2 items-center justify-center">
                     <Plus size={18} />
-                    <span className={cn(collapsed ? "sr-only" : "")}>Adicionar Anime</span>
+                    <span>Adicionar Anime</span>
                   </Button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className="text-red-500 hover:bg-red-500/10">
-                  <Link to="/login">
+                <SidebarMenuButton asChild className="text-red-500 hover:bg-red-500/10" onClick={signOut}>
+                  <Button variant="ghost" className="w-full flex gap-2 items-center justify-center text-red-500">
                     <LogOut size={18} />
                     <span>Sair</span>
-                  </Link>
+                  </Button>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -122,7 +117,7 @@ export function AppSidebar() {
       </SidebarContent>
       
       <SidebarFooter>
-        <div className={cn("p-4", collapsed ? "sr-only" : "")}>
+        <div className="p-4">
           <div className="flex items-center gap-2">
             <Settings size={16} className="text-muted-foreground" />
             <Link to="/settings" className="text-xs text-muted-foreground hover:text-primary transition-colors">
