@@ -48,12 +48,18 @@ export const useAnimeLists = (status?: AnimeStatus) => {
 export const useAddAnime = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { user } = useAuth();
   
   return useMutation({
-    mutationFn: async (newAnime: Omit<Anime, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+    mutationFn: async (newAnime: Omit<Anime, 'id' | 'created_at' | 'updated_at'>) => {
+      if (!user) throw new Error('User must be logged in');
+      
       const { data, error } = await supabase
         .from('anime_lists')
-        .insert(newAnime)
+        .insert({
+          ...newAnime,
+          user_id: user.id
+        })
         .select()
         .single();
       
@@ -148,31 +154,6 @@ export const useDeleteAnime = () => {
         variant: "destructive",
       });
     },
-  });
-};
-
-// Get user profile
-export const useUserProfile = () => {
-  const { user } = useAuth();
-  
-  return useQuery({
-    queryKey: ['user-profile'],
-    queryFn: async () => {
-      if (!user) return null;
-      
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      
-      if (error) {
-        throw error;
-      }
-      
-      return data;
-    },
-    enabled: !!user,
   });
 };
 

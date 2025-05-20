@@ -26,6 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { AddAnimeDialog } from "@/components/AddAnimeDialog";
 
 export function AppSidebar() {
   const location = useLocation();
@@ -97,10 +98,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90">
-                  <Button className="w-full flex gap-2 items-center justify-center">
-                    <Plus size={18} />
-                    <span>Adicionar Anime</span>
-                  </Button>
+                  <AddAnimeDialog />
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
