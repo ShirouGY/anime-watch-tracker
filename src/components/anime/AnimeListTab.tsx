@@ -9,7 +9,7 @@ interface AnimeListTabProps {
   isWatched?: boolean;
   onRemoveAnime: (animeId: string) => void;
   onMoveToWatched?: (animeId: string) => void;
-  onRateAnime?: (animeId: string) => void;
+  onRateAnime?: (animeId: string, rating: number) => void;
 }
 
 export function AnimeListTab({

@@ -59,7 +59,7 @@ export function AppSidebar() {
     <Sidebar className="border-r">
       <SidebarHeader className="flex justify-center items-center py-6">
         <Link to="/dashboard" className="w-full flex justify-center">
-          <h1 className="text-xl font-bold anime-gradient-text">MeuAnimeLista</h1>
+          <h1 className="text-xl font-bold anime-gradient-text">SoloAnimeList</h1>
         </Link>
       </SidebarHeader>
       

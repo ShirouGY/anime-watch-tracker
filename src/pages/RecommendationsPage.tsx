@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -6,10 +5,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, Plus, Star } from "lucide-react";
 import { sampleRecommendations } from "@/data/sampleData";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from '@/contexts/AuthContext';
 
 const RecommendationsPage = () => {
   const [activeTab, setActiveTab] = useState("all");
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  const isPremium = user?.user_metadata?.is_premium;
+
+  if (!isPremium) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Card className="p-8 text-center">
+          <Star size={48} className="mx-auto text-yellow-500 mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Conteúdo Premium Exclusivo</h2>
+          <p className="text-muted-foreground">Esta seção está disponível apenas para usuários Premium.</p>
+        </Card>
+      </div>
+    );
+  }
   
   const handleAddToWatchlist = (anime: any) => {
     toast({
@@ -95,12 +110,10 @@ const RecommendationsPage = () => {
           </div>
         </TabsContent>
         
-        {/* Outras abas compartilham o mesmo conteúdo através do estado filteredRecommendations */}
         <TabsContent value="action" className="mt-0">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredRecommendations.map((anime) => (
               <Card key={anime.id} className="overflow-hidden anime-card">
-                {/* Conteúdo igual ao da aba "all" */}
                 <div className="relative">
                   <img 
                     src={anime.image} 
@@ -148,12 +161,10 @@ const RecommendationsPage = () => {
           </div>
         </TabsContent>
         
-        {/* O mesmo padrão se repete para as outras abas, com o conteúdo controlado pelo estado filteredRecommendations */}
         <TabsContent value="romance" className="mt-0">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredRecommendations.length > 0 ? (
               filteredRecommendations.map((anime) => (
-                // Conteúdo igual ao das outras abas
                 <Card key={anime.id} className="overflow-hidden anime-card">
                   <div className="relative">
                     <img 
@@ -209,11 +220,9 @@ const RecommendationsPage = () => {
           </div>
         </TabsContent>
         
-        {/* As outras abas seguiriam o mesmo padrão */}
         <TabsContent value="comedy" className="mt-0">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredRecommendations.map((anime) => (
-              // Mesmo conteúdo das cards de anime
               <Card key={anime.id} className="overflow-hidden anime-card">
                 <div className="relative">
                   <img 
@@ -263,10 +272,8 @@ const RecommendationsPage = () => {
         </TabsContent>
         
         <TabsContent value="fantasy" className="mt-0">
-          {/* Conteúdo similar */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredRecommendations.map((anime) => (
-              // Card de anime
               <Card key={anime.id} className="overflow-hidden anime-card">
                 <div className="relative">
                   <img 
@@ -316,10 +323,8 @@ const RecommendationsPage = () => {
         </TabsContent>
         
         <TabsContent value="drama" className="mt-0">
-          {/* Conteúdo similar */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredRecommendations.map((anime) => (
-              // Card de anime
               <Card key={anime.id} className="overflow-hidden anime-card">
                 <div className="relative">
                   <img 
@@ -369,10 +374,8 @@ const RecommendationsPage = () => {
         </TabsContent>
         
         <TabsContent value="sci-fi" className="mt-0">
-          {/* Conteúdo similar */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredRecommendations.map((anime) => (
-              // Card de anime
               <Card key={anime.id} className="overflow-hidden anime-card">
                 <div className="relative">
                   <img 

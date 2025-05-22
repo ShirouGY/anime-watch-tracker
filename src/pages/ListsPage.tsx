@@ -1,9 +1,9 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AddAnimeDialog } from "@/components/AddAnimeDialog";
 import { useAnimeLists, useUpdateAnime, useDeleteAnime } from "@/hooks/use-anime-lists";
 import { AnimeListTab } from "@/components/anime/AnimeListTab";
+import { useAuth } from '@/contexts/AuthContext';
 
 const ListsPage = () => {
   const { toast } = useToast();
@@ -11,6 +11,9 @@ const ListsPage = () => {
   const { data: watchedAnimes, isLoading: loadingWatched } = useAnimeLists('completed');
   const updateAnimeMutation = useUpdateAnime();
   const deleteAnimeMutation = useDeleteAnime();
+  const { user } = useAuth();
+
+  const isPremium = user?.user_metadata?.is_premium;
 
   const handleRemoveAnime = (animeId: string) => {
     deleteAnimeMutation.mutate(animeId);
@@ -27,9 +30,14 @@ const ListsPage = () => {
     });
   };
   
-  const handleRateAnime = () => {
+  const handleRateAnime = (animeId: string, rating: number) => {
+    updateAnimeMutation.mutate({
+      id: animeId,
+      rating: rating,
+    });
+
     toast({
-      description: `Avalie este anime.`,
+      description: `Anime avaliado com ${rating} estrelas.`,
     });
   };
   
@@ -44,6 +52,9 @@ const ListsPage = () => {
         <TabsList className="mb-4">
           <TabsTrigger value="watchlist">Quero Assistir</TabsTrigger>
           <TabsTrigger value="watched">Assistidos</TabsTrigger>
+          {isPremium && (
+            <TabsTrigger value="recommended">Recomendados</TabsTrigger>
+          )}
         </TabsList>
         
         <TabsContent value="watchlist">
@@ -64,6 +75,14 @@ const ListsPage = () => {
             onRateAnime={handleRateAnime}
           />
         </TabsContent>
+
+        {isPremium && (
+          <TabsContent value="recommended">
+            <div className="text-center py-10">
+               <p className="text-muted-foreground">Conteúdo de recomendações para usuários Premium.</p>
+            </div>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

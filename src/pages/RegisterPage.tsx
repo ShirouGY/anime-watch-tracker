@@ -49,7 +49,7 @@ const RegisterPage = () => {
             <BookOpen className="h-12 w-12 text-anime-purple" />
           </div>
           <CardTitle className="text-2xl font-bold anime-gradient-text">
-            MeuAnimeLista
+            SoloAnimeList
           </CardTitle>
           <CardDescription>
             Crie sua conta para gerenciar suas listas de animes
