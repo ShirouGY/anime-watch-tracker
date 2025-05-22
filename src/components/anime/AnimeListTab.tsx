@@ -1,5 +1,3 @@
-
-import { AddAnimeDialog } from "@/components/AddAnimeDialog";
 import { Anime } from "@/hooks/use-anime-lists";
 import { AnimeCard } from "./AnimeCard";
 import { EmptyState } from "./EmptyState";

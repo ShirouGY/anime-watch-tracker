@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AddAnimeDialog } from "@/components/AddAnimeDialog";
@@ -28,7 +27,7 @@ const ListsPage = () => {
     });
   };
   
-  const handleRateAnime = (animeId: string) => {
+  const handleRateAnime = () => {
     toast({
       description: `Avalie este anime.`,
     });
