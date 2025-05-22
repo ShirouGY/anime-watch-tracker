@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,15 +8,74 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Clock, Crown, Medal, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { sampleAnimesWatched } from "@/data/sampleData";
+import { useAnimeLists } from "@/hooks/use-anime-lists";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { AvatarSelector } from "@/components/profile/AvatarSelector";
 
 const ProfilePage = () => {
   const [isPremium, setIsPremium] = useState(false);
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
   
-  const totalWatched = sampleAnimesWatched.length;
-  const totalHours = sampleAnimesWatched.reduce((acc, anime) => acc + anime.episodes * 0.4, 0).toFixed(1);
-  const averageRating = (sampleAnimesWatched.reduce((acc, anime) => acc + anime.rating, 0) / totalWatched).toFixed(1);
+  const { data: watchedAnimes, isLoading: loadingWatched } = useAnimeLists('completed');
+  const { data: watchingAnimes, isLoading: loadingWatching } = useAnimeLists('watching');
+  const { data: planToWatchAnimes, isLoading: loadingPlanToWatch } = useAnimeLists('plan_to_watch');
+  
+  useEffect(() => {
+    if (user) {
+      // Fetch user profile
+      const fetchUserProfile = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('username, avatar_url')
+            .eq('id', user.id)
+            .single();
+          
+          if (error) {
+            throw error;
+          }
+          
+          if (data) {
+            setUsername(data.username);
+            setAvatar(data.avatar_url);
+          }
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+        }
+      };
+      
+      fetchUserProfile();
+    }
+  }, [user]);
+  
+  const isLoading = loadingWatched || loadingWatching || loadingPlanToWatch;
+  
+  // Calculate statistics
+  const allAnimes = [...(watchedAnimes || []), ...(watchingAnimes || []), ...(planToWatchAnimes || [])];
+  const totalWatched = watchedAnimes ? watchedAnimes.length : 0;
+  const totalHours = watchedAnimes 
+    ? watchedAnimes.reduce((acc, anime) => acc + ((anime.episodes || 0) * 0.4), 0).toFixed(1) 
+    : "0.0";
+  
+  const averageRating = watchedAnimes && watchedAnimes.length > 0 
+    ? (watchedAnimes.reduce((acc, anime) => acc + (anime.rating || 0), 0) / totalWatched).toFixed(1) 
+    : "0.0";
+  
+  // Calculate otaku level based on watched anime count
+  const getOtakuLevel = () => {
+    if (totalWatched >= 25) return 5;
+    if (totalWatched >= 15) return 4;
+    if (totalWatched >= 10) return 3;
+    if (totalWatched >= 5) return 2;
+    if (totalWatched >= 1) return 1;
+    return 0;
+  };
+  
+  const otakuLevel = getOtakuLevel();
   
   const medals = [
     {
@@ -48,8 +107,10 @@ const ProfilePage = () => {
       name: "Crítico Mestre",
       description: "Avaliou pelo menos 15 animes",
       icon: Star,
-      achieved: false,
-      progress: 60
+      achieved: watchedAnimes ? watchedAnimes.filter(anime => anime.rating).length >= 15 : false,
+      progress: watchedAnimes 
+        ? Math.min((watchedAnimes.filter(anime => anime.rating).length / 15) * 100, 100) 
+        : 0
     },
     {
       id: 5,
@@ -68,6 +129,19 @@ const ProfilePage = () => {
       description: "Você foi atualizado para o plano Premium.",
     });
   };
+
+  const handleAvatarChange = (url: string) => {
+    setAvatar(url);
+  };
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="ml-2">Carregando seu perfil...</p>
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-8 animate-fade-in">
@@ -75,17 +149,23 @@ const ProfilePage = () => {
         <Card className="w-full md:w-80 flex-shrink-0">
           <CardContent className="p-6">
             <div className="flex flex-col items-center">
-              <Avatar className="h-24 w-24">
-                <AvatarImage src="https://i.pravatar.cc/300" alt="Foto de perfil" />
-                <AvatarFallback>OU</AvatarFallback>
-              </Avatar>
-              <h2 className="mt-4 text-xl font-bold">Otaku User</h2>
-              <p className="text-sm text-muted-foreground">otaku@example.com</p>
+              <div className="relative">
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src={avatar || "https://i.imgur.com/7LdpJKQ.png"} alt="Foto de perfil" />
+                  <AvatarFallback>{username?.substring(0, 2) || "OU"}</AvatarFallback>
+                </Avatar>
+                <AvatarSelector 
+                  currentAvatar={avatar} 
+                  onAvatarChange={handleAvatarChange} 
+                />
+              </div>
+              <h2 className="mt-4 text-xl font-bold">{username || "Otaku User"}</h2>
+              <p className="text-sm text-muted-foreground">{user?.email || "otaku@example.com"}</p>
               
               <div className="flex items-center mt-2 gap-2">
                 <Badge variant="outline" className="flex items-center gap-1 border-anime-purple">
                   <Medal className="h-3 w-3 text-anime-purple" />
-                  <span>Nível 3</span>
+                  <span>Nível {otakuLevel}</span>
                 </Badge>
                 
                 {isPremium && (
@@ -215,26 +295,32 @@ const ProfilePage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {sampleAnimesWatched.slice(0, 5).map((anime, index) => (
-                      <div key={anime.id} className="flex items-center gap-3 pb-3 border-b border-border last:border-0">
-                        <div className="w-12 h-12 rounded-md overflow-hidden flex-shrink-0">
-                          <img src={anime.image} alt={anime.title} className="w-full h-full object-cover" />
+                    {watchedAnimes && watchedAnimes.length > 0 ? (
+                      watchedAnimes.slice(0, 5).map((anime, index) => (
+                        <div key={anime.id} className="flex items-center gap-3 pb-3 border-b border-border last:border-0">
+                          <div className="w-12 h-12 rounded-md overflow-hidden flex-shrink-0">
+                            <img src={anime.image || '/placeholder.svg'} alt={anime.title} className="w-full h-full object-cover" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{anime.title}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {index === 0 ? 'Adicionado à lista de assistidos' : 
+                               index === 1 ? `Avaliado com ${anime.rating || 0} estrelas` :
+                               'Adicionado à lista de assistidos'}
+                            </p>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {index === 0 ? 'Hoje' : 
+                             index === 1 ? 'Ontem' : 
+                             `${index + 1} dias atrás`}
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <p className="font-medium text-sm">{anime.title}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {index === 0 ? 'Adicionado à lista de assistidos' : 
-                             index === 1 ? 'Avaliado com ' + anime.rating + ' estrelas' :
-                             'Adicionado à lista de assistidos'}
-                          </p>
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {index === 0 ? 'Hoje' : 
-                           index === 1 ? 'Ontem' : 
-                           `${index + 1} dias atrás`}
-                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-6 text-muted-foreground">
+                        <p>Nenhuma atividade recente</p>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </CardContent>
               </Card>
