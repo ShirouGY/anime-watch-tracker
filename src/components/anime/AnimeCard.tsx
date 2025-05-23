@@ -6,6 +6,7 @@ import { Check, Star, Trash } from "lucide-react";
 import { Anime } from "@/hooks/use-anime-lists";
 import { cn } from "@/lib/utils";
 import { AnimeProgressBar } from "./AnimeProgressBar";
+import { useUpdateProgress } from "@/hooks/use-anime-progress";
 
 interface AnimeCardProps {
   anime: Anime;
@@ -24,11 +25,36 @@ export function AnimeCard({
 }: AnimeCardProps) {
   const [showRatingInput, setShowRatingInput] = useState(false);
   const [hoveredRating, setHoveredRating] = useState(0);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const updateProgressMutation = useUpdateProgress();
 
   const handleRateClick = (rating: number) => {
     if (onRate) {
       onRate(anime.id, rating);
       setShowRatingInput(false);
+    }
+  };
+
+  const handleMarkAsWatched = async () => {
+    if (isUpdating || !onMarkAsWatched) return;
+    
+    setIsUpdating(true);
+    
+    try {
+      // Mark as watched by completing all episodes
+      await updateProgressMutation.mutateAsync({
+        animeListId: anime.id,
+        currentEpisode: anime.episodes || 1,
+        totalEpisodes: anime.episodes || 1,
+        animeId: anime.anime_id,
+        animeTitle: anime.title,
+        animeIcon: anime.image,
+      });
+      
+      // Call the parent handler to move it to watched list
+      onMarkAsWatched(anime.id);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -119,7 +145,8 @@ export function AnimeCard({
               variant="outline" 
               size="sm"
               className="flex-1"
-              onClick={() => onMarkAsWatched && onMarkAsWatched(anime.id)}
+              onClick={handleMarkAsWatched}
+              disabled={isUpdating}
             >
               <Check size={16} className="mr-1" />
               Já assisti

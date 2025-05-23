@@ -62,6 +62,7 @@ export type Database = {
           created_at: string
           current_episode: number
           id: string
+          is_archived: boolean
           total_episodes: number
           updated_at: string
           user_id: string
@@ -73,6 +74,7 @@ export type Database = {
           created_at?: string
           current_episode?: number
           id?: string
+          is_archived?: boolean
           total_episodes: number
           updated_at?: string
           user_id: string
@@ -84,6 +86,7 @@ export type Database = {
           created_at?: string
           current_episode?: number
           id?: string
+          is_archived?: boolean
           total_episodes?: number
           updated_at?: string
           user_id?: string
