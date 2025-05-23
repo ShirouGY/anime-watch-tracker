@@ -11,6 +11,7 @@ import { useAnimeLists } from "@/hooks/use-anime-lists";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AvatarSelector } from "@/components/profile/AvatarSelector";
+import { AchievementsSection } from "@/components/profile/AchievementsSection";
 
 const ProfilePage = () => {
   const [isPremium, setIsPremium] = useState(false);
@@ -75,51 +76,6 @@ const ProfilePage = () => {
   };
   
   const otakuLevel = getOtakuLevel();
-  
-  const medals = [
-    {
-      id: 1,
-      name: "Iniciante",
-      description: "Assistiu pelo menos 3 animes",
-      icon: Medal,
-      achieved: totalWatched >= 3,
-      progress: totalWatched >= 3 ? 100 : (totalWatched / 3) * 100
-    },
-    {
-      id: 2,
-      name: "Otaku Júnior",
-      description: "Assistiu pelo menos 10 animes",
-      icon: Medal,
-      achieved: totalWatched >= 10,
-      progress: totalWatched >= 10 ? 100 : (totalWatched / 10) * 100
-    },
-    {
-      id: 3,
-      name: "Otaku Sênior",
-      description: "Assistiu pelo menos 25 animes",
-      icon: Medal,
-      achieved: totalWatched >= 25,
-      progress: totalWatched >= 25 ? 100 : (totalWatched / 25) * 100
-    },
-    {
-      id: 4,
-      name: "Crítico Mestre",
-      description: "Avaliou pelo menos 15 animes",
-      icon: Star,
-      achieved: watchedAnimes ? watchedAnimes.filter(anime => anime.rating).length >= 15 : false,
-      progress: watchedAnimes 
-        ? Math.min((watchedAnimes.filter(anime => anime.rating).length / 15) * 100, 100) 
-        : 0
-    },
-    {
-      id: 5,
-      name: "Maratonista",
-      description: "Assistiu pelo menos 50 horas de anime",
-      icon: Clock,
-      achieved: parseFloat(totalHours) >= 50,
-      progress: Math.min((parseFloat(totalHours) / 50) * 100, 100)
-    },
-  ];
   
   const handleUpgradeToPremium = () => {
     setIsPremium(true);
@@ -240,46 +196,23 @@ const ProfilePage = () => {
             </CardContent>
           </Card>
           
-          <Tabs defaultValue="medals">
+          <Tabs defaultValue="conquistas">
             <TabsList>
-              <TabsTrigger value="medals">Medalhas</TabsTrigger>
+              <TabsTrigger value="conquistas">Conquistas</TabsTrigger>
               <TabsTrigger value="history">Histórico</TabsTrigger>
               {isPremium && (
                 <TabsTrigger value="premium">Recursos Premium</TabsTrigger>
               )}
             </TabsList>
             
-            <TabsContent value="medals" className="space-y-4 mt-4">
+            <TabsContent value="conquistas" className="space-y-4 mt-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Suas Conquistas</CardTitle>
-                  <CardDescription>Medalhas que você desbloqueou ou está progredindo</CardDescription>
+                  <CardTitle>Sistema de Conquistas</CardTitle>
+                  <CardDescription>Desbloqueie medalhas conforme sua jornada no mundo dos animes</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {medals.map((medal) => (
-                      <Card key={medal.id} className={`border ${medal.achieved ? 'border-anime-purple/50 shadow-md' : 'border-border'}`}>
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2.5 rounded-full ${medal.achieved ? 'bg-anime-purple/20 text-anime-purple' : 'bg-secondary text-muted-foreground'}`}>
-                              <medal.icon className="h-5 w-5" />
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="font-medium">{medal.name}</h4>
-                              <p className="text-xs text-muted-foreground">{medal.description}</p>
-                            </div>
-                          </div>
-                          
-                          <div className="mt-3">
-                            <Progress value={medal.progress} className="h-1.5" />
-                            <p className="text-xs text-muted-foreground text-right mt-1">
-                              {medal.achieved ? 'Conquistado!' : `${Math.round(medal.progress)}% completo`}
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                  <AchievementsSection />
                 </CardContent>
               </Card>
             </TabsContent>
