@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Check, Star, Trash } from "lucide-react";
 import { Anime } from "@/hooks/use-anime-lists";
 import { cn } from "@/lib/utils";
+import { AnimeProgressBar } from "./AnimeProgressBar";
 
 interface AnimeCardProps {
   anime: Anime;
@@ -83,49 +85,55 @@ export function AnimeCard({
           </div>
         )}
       </div>
-      <div className="p-3 flex justify-between gap-2">
-        {isWatched ? (
-          showRatingInput ? (
-            renderStars()
-          ) : anime.rating != null ? (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex-1 text-muted-foreground flex items-center gap-1"
-              onClick={() => setShowRatingInput(true)}
-            >
-              {renderStars()}
-            </Button>
+      
+      <div className="p-3">
+        {/* Progress bar for watchlist animes */}
+        {!isWatched && <AnimeProgressBar anime={anime} />}
+        
+        <div className="flex justify-between gap-2 mt-3">
+          {isWatched ? (
+            showRatingInput ? (
+              renderStars()
+            ) : anime.rating != null ? (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex-1 text-muted-foreground flex items-center gap-1"
+                onClick={() => setShowRatingInput(true)}
+              >
+                {renderStars()}
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex-1 text-muted-foreground"
+                onClick={() => setShowRatingInput(true)}
+              >
+                <Star size={16} className="mr-1" />
+                Avaliar
+              </Button>
+            )
           ) : (
             <Button 
               variant="outline" 
-              size="sm" 
-              className="flex-1 text-muted-foreground"
-              onClick={() => setShowRatingInput(true)}
+              size="sm"
+              className="flex-1"
+              onClick={() => onMarkAsWatched && onMarkAsWatched(anime.id)}
             >
-              <Star size={16} className="mr-1" />
-              Avaliar
+              <Check size={16} className="mr-1" />
+              Já assisti
             </Button>
-          )
-        ) : (
+          )}
           <Button 
             variant="outline" 
-            size="sm"
-            className="flex-1"
-            onClick={() => onMarkAsWatched && onMarkAsWatched(anime.id)}
+            size="sm" 
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            onClick={() => onRemove(anime.id)}
           >
-            <Check size={16} className="mr-1" />
-            Já assisti
+            <Trash size={16} />
           </Button>
-        )}
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-          onClick={() => onRemove(anime.id)}
-        >
-          <Trash size={16} />
-        </Button>
+        </div>
       </div>
     </Card>
   );
