@@ -54,6 +54,50 @@ export type Database = {
         }
         Relationships: []
       }
+      anime_progress: {
+        Row: {
+          anime_list_id: string
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          current_episode: number
+          id: string
+          total_episodes: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          anime_list_id: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_episode?: number
+          id?: string
+          total_episodes: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          anime_list_id?: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_episode?: number
+          id?: string
+          total_episodes?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anime_progress_anime_list_id_fkey"
+            columns: ["anime_list_id"]
+            isOneToOne: false
+            referencedRelation: "anime_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -78,6 +122,39 @@ export type Database = {
           id?: string
           updated_at?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_type: string
+          anime_icon: string | null
+          anime_id: string
+          anime_title: string
+          created_at: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_type?: string
+          anime_icon?: string | null
+          anime_id: string
+          anime_title: string
+          created_at?: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_type?: string
+          anime_icon?: string | null
+          anime_id?: string
+          anime_title?: string
+          created_at?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
         }
         Relationships: []
       }
