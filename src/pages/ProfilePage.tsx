@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -6,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Clock, Crown, Medal, Star } from "lucide-react";
+import { BookOpen, Clock, Crown, Medal, Star, Trophy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAnimeLists } from "@/hooks/use-anime-lists";
 import { useAuth } from "@/contexts/AuthContext";
@@ -192,17 +191,15 @@ const ProfilePage = () => {
               )}
               
               <div className="w-full mt-6 space-y-3">
-                <Button variant="outline" className="w-full justify-start">
-                  Editar Perfil
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  Configurações
-                </Button>
                 {isPremium && (
                   <Button variant="outline" className="w-full justify-start">
                     Gerenciar Assinatura
                   </Button>
                 )}
+                <Button variant="outline" className="w-full justify-start">
+                  <Trophy size={16} className="mr-2" />
+                  Conquistas
+                </Button>
               </div>
             </div>
           </CardContent>

@@ -1,73 +1,69 @@
-# Welcome to your Lovable project
+# SoloAnimeList: Seu Tracker de Animes Pessoal
 
-## Project info
+## Descrição do Projeto
 
-**URL**: https://lovable.dev/projects/27ace203-35db-4f0f-971f-58b48fe4cb74
+O SoloAnimeList é uma aplicação web pessoal para rastrear animes que você deseja assistir, está assistindo ou já assistiu. Organize suas listas, acompanhe seu progresso de episódios, avalie animes completados e veja suas estatísticas de visualização.
 
-## How can I edit this code?
+## Funcionalidades
 
-There are several ways of editing your application.
+*   **Minhas Listas:** Organize animes nas categorias "Quero Assistir" e "Assistidos".
+*   **Rastreamento de Progresso:** Acompanhe em qual episódio você parou em animes assistindo.
+*   **Avaliação de Animes:** Dê notas aos animes que você completou.
+*   **Estatísticas:** Veja um resumo do seu consumo de animes (total assistidos, horas, nota média, nível Otaku).
+*   **Perfil:** Personalize seu perfil com um avatar e acompanhe suas conquistas (funcionalidade em desenvolvimento).
+*   **Autenticação:** Login seguro para manter seus dados sincronizados.
+*   **Recursos Premium (Exemplo):** Demonstração de funcionalidades exclusivas para usuários premium (como arquivamento e acesso a conteúdo recomendado).
 
-**Use Lovable**
+## Tecnologias Utilizadas
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/27ace203-35db-4f0f-971f-58b48fe4cb74) and start prompting.
+*   **Frontend:**
+    *   [React](https://reactjs.org/): Biblioteca JavaScript para construir a interface do usuário.
+    *   [TypeScript](https://www.typescriptlang.org/): Adiciona tipagem estática ao JavaScript.
+    *   [Vite](https://vitejs.dev/): Ferramenta de build rápida.
+    *   [Tailwind CSS](https://tailwindcss.com/): Framework CSS utilitário para estilização rápida e responsiva.
+    *   [shadcn-ui](https://ui.shadcn.com/): Componentes UI construídos com Tailwind CSS e Radix UI.
 
-Changes made via Lovable will be committed automatically to this repo.
+*   **Backend (BaaS - Backend as a Service):**
+    *   [Supabase](https://supabase.io/): Utilizado para:
+        *   Banco de Dados (PostgreSQL) para armazenar dados de usuários, animes, listas e progresso.
+        *   Autenticação: Gerenciamento de usuários e login.
+        *   Storage: Armazenamento de avatares de usuário.
 
-**Use your preferred IDE**
+## Como Rodar o Projeto Localmente
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1.  **Clone o repositório:**
+    ```bash
+    git clone <URL_DO_SEU_REPOSITORIO>
+    cd anime-watch-tracker # Ou o nome da pasta do seu projeto
+    ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+2.  **Instale as dependências:**
+    ```bash
+    npm install
+    ```
 
-Follow these steps:
+3.  **Configure o Supabase:**
+    *   Crie um projeto no [Supabase](https://app.supabase.io/).
+    *   Obtenha sua **URL** e **Anon Key** nas configurações do projeto (Settings -> API).
+    *   Crie as tabelas `profiles`, `anime_lists`, e `anime_progress` conforme a estrutura utilizada no código (você pode inspecionar os hooks em `src/hooks/use-anime-lists.ts` para ver os campos esperados).
+    *   Configure o Supabase Storage criando um bucket chamado `avatars`.
+    *   Crie um arquivo `.env.local` na raiz do projeto com suas chaves do Supabase:
+        ```env
+        VITE_SUPABASE_URL=SUA_SUPABASE_URL
+        VITE_SUPABASE_ANON_KEY=SUA_SUPABASE_ANON_KEY
+        ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+4.  **Inicie o servidor de desenvolvimento:**
+    ```bash
+    npm run dev
+    ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+O aplicativo estará disponível em `http://localhost:5173` (ou outra porta disponível).
 
-# Step 3: Install the necessary dependencies.
-npm i
+## Contribuição
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+Sinta-se à vontade para contribuir com melhorias ou novas funcionalidades. Por favor, abra uma issue para discutir as mudanças propostas antes de enviar um Pull Request.
 
-**Edit a file directly in GitHub**
+## Licença
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/27ace203-35db-4f0f-971f-58b48fe4cb74) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Este projeto está licenciado sob a [Licença MIT](https://opensource.org/licenses/MIT).
