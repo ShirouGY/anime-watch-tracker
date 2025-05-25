@@ -5,7 +5,7 @@
 O SoloAnimeList é uma aplicação web pessoal para rastrear animes que você deseja assistir, está assistindo ou já assistiu. Organize suas listas, acompanhe seu progresso de episódios, avalie animes completados e veja suas estatísticas de visualização.
 
 ## Funcionalidades
-
+a
 *   **Minhas Listas:** Organize animes nas categorias "Quero Assistir" e "Assistidos".
 *   **Rastreamento de Progresso:** Acompanhe em qual episódio você parou em animes assistindo.
 *   **Avaliação de Animes:** Dê notas aos animes que você completou.
