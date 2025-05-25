@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,13 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Clock, Crown, Medal, Star, Trophy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAnimeLists } from "@/hooks/use-anime-lists";
+import { useAnimeLists, Anime } from "@/hooks/use-anime-lists";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AvatarSelector } from "@/components/profile/AvatarSelector";
 import { AchievementsSection } from "@/components/profile/AchievementsSection";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
+interface ProfileData {
+  username: string | null;
+  avatar_url: string | null;
+  is_premium: boolean | null;
+}
 
 const ProfilePage = () => {
   const [isPremium, setIsPremium] = useState(false);
@@ -27,6 +33,11 @@ const ProfilePage = () => {
   const { data: watchingAnimes, isLoading: loadingWatching } = useAnimeLists('watching');
   const { data: planToWatchAnimes, isLoading: loadingPlanToWatch } = useAnimeLists('plan_to_watch');
   
+  const completedAnimeIdsSet = useMemo(() => {
+    if (!watchedAnimes) return new Set<string>();
+    return new Set(watchedAnimes.map(anime => anime.anime_id));
+  }, [watchedAnimes]);
+  
   useEffect(() => {
     if (user) {
       // Fetch user profile
@@ -34,9 +45,9 @@ const ProfilePage = () => {
         try {
           const { data, error } = await supabase
             .from('profiles')
-            .select('username, avatar_url')
+            .select('username, avatar_url, is_premium')
             .eq('id', user.id)
-            .single();
+            .single<ProfileData>();
           
           if (error) {
             throw error;
@@ -45,6 +56,11 @@ const ProfilePage = () => {
           if (data) {
             setUsername(data.username);
             setAvatar(data.avatar_url);
+            setIsPremium(data.is_premium || false);
+          } else {
+            setUsername(null);
+            setAvatar(null);
+            setIsPremium(false);
           }
         } catch (error) {
           console.error('Error fetching user profile:', error);
@@ -116,6 +132,7 @@ const ProfilePage = () => {
                   currentAvatar={avatar} 
                   onAvatarChange={handleAvatarChange}
                   isPremium={isPremium}
+                  completedAnimeIds={completedAnimeIdsSet}
                 />
               </div>
               <h2 className="mt-4 text-xl font-bold">{username || "Otaku User"}</h2>
@@ -151,11 +168,6 @@ const ProfilePage = () => {
               )}
               
               <div className="w-full mt-6 space-y-3">
-                {isPremium && (
-                  <Button variant="outline" className="w-full justify-start">
-                    Gerenciar Assinatura
-                  </Button>
-                )}
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
@@ -361,7 +373,6 @@ const ProfilePage = () => {
           </DialogHeader>
           <ScrollArea className="max-h-[400px] py-4">
             <div className="grid gap-4 md:grid-cols-1">
-              {/* Se a aba de medalhas for removida, este conteúdo pode ser movido diretamente para dentro do DialogContent */}
               <Card className="border border-anime-purple/50 shadow-md">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">

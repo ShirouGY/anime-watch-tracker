@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Dialog, 
@@ -29,16 +28,19 @@ interface AvatarOption {
   url: string;
   isPremium: boolean;
   name: string;
+  animeId?: string;
 }
 
 export function AvatarSelector({
   currentAvatar,
   onAvatarChange,
-  isPremium = false
+  isPremium = false,
+  completedAnimeIds = new Set()
 }: {
   currentAvatar: string | null;
   onAvatarChange: (url: string) => void;
   isPremium?: boolean;
+  completedAnimeIds?: Set<string>;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [availableAvatars, setAvailableAvatars] = useState<AvatarOption[]>([]);
@@ -93,11 +95,16 @@ export function AvatarSelector({
               const { data: { publicUrl } } = supabase.storage
                 .from('avatar-icons')
                 .getPublicUrl(`icons_premium/${file.name}`);
+
+              // Tenta extrair o animeId do nome do arquivo (ex: "anime-id_icon.png")
+              const animeIdMatch = file.name.match(/^([^_\.]+)_/); // Pega tudo antes do primeiro '_'
+              const associatedAnimeId = animeIdMatch ? animeIdMatch[1] : undefined;
               
               allAvatars.push({
                 url: publicUrl,
                 isPremium: true,
-                name: file.name
+                name: file.name,
+                animeId: associatedAnimeId // Adiciona o ID do anime se encontrado
               });
             });
           }
@@ -121,13 +128,23 @@ export function AvatarSelector({
   const handleSelectAvatar = async (avatarOption: AvatarOption) => {
     if (!user) return;
 
-    // Check if user can access premium avatars
-    if (avatarOption.isPremium && !isPremium) {
-      toast({
-        variant: "destructive",
-        description: "Este avatar é exclusivo para usuários Premium!"
-      });
-      return;
+    // Verifica se o usuário pode acessar avatares premium E se ele completou o anime associado
+    if (avatarOption.isPremium) {
+      if (!isPremium) {
+        toast({
+          variant: "destructive",
+          description: "Este avatar é exclusivo para usuários Premium!"
+        });
+        return;
+      }
+      // Se for premium E tiver um animeId associado, verifica se o anime foi completado
+      if (avatarOption.animeId && !completedAnimeIds.has(avatarOption.animeId)) {
+         toast({
+           variant: "destructive",
+           description: `Você precisa assistir o anime relacionado a este ícone para usá-lo.`
+         });
+         return;
+      }
     }
 
     try {
@@ -193,44 +210,54 @@ export function AvatarSelector({
             </div>
           ) : availableAvatars.length > 0 ? (
             <div className="grid grid-cols-3 gap-4">
-              {availableAvatars.map((avatarOption, index) => (
-                <div key={index} className="flex flex-col items-center gap-2">
-                  <div className="relative">
-                    <button
-                      className={`rounded-full overflow-hidden border-2 transition-all ${
-                        currentAvatar === avatarOption.url
-                          ? "border-anime-purple scale-110"
-                          : "border-transparent hover:border-anime-purple/50"
-                      } ${
-                        avatarOption.isPremium && !isPremium 
-                          ? "opacity-50 cursor-not-allowed" 
-                          : "cursor-pointer"
-                      }`}
-                      onClick={() => handleSelectAvatar(avatarOption)}
-                      disabled={avatarOption.isPremium && !isPremium}
-                    >
-                      <Avatar className="h-20 w-20">
-                        <AvatarImage src={avatarOption.url} alt={`Avatar ${index + 1}`} />
-                        <AvatarFallback>{`A${index + 1}`}</AvatarFallback>
-                      </Avatar>
-                    </button>
-                    
-                    {avatarOption.isPremium && (
-                      <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-500 to-amber-500 text-white p-1 h-6 w-6 rounded-full flex items-center justify-center">
-                        <Crown className="h-3 w-3" />
-                      </Badge>
-                    )}
+              {availableAvatars.map((avatarOption, index) => {
+                // Determinar se o avatar está desabilitado
+                const isOptionDisabled = avatarOption.isPremium && 
+                                         (!isPremium || (avatarOption.animeId && !completedAnimeIds.has(avatarOption.animeId)));
+
+                return (
+                  <div key={index} className="flex flex-col items-center gap-2">
+                    <div className="relative">
+                      <button
+                        className={`rounded-full overflow-hidden border-2 transition-all ${
+                          currentAvatar === avatarOption.url
+                            ? "border-anime-purple scale-110"
+                            : "border-transparent hover:border-anime-purple/50"
+                        } ${
+                          isOptionDisabled // Usa a variável de desabilitado
+                            ? "opacity-50 cursor-not-allowed"
+                            : "cursor-pointer"
+                        }`}
+                        onClick={() => handleSelectAvatar(avatarOption)}
+                        disabled={isOptionDisabled} // Usa a variável de desabilitado
+                      >
+                        <Avatar className="h-20 w-20">
+                          <AvatarImage src={avatarOption.url} alt={`Avatar ${index + 1}`} />
+                          <AvatarFallback>{`A${index + 1}`}</AvatarFallback>
+                        </Avatar>
+                      </button>
+                      
+                      {avatarOption.isPremium && (
+                        <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-500 to-amber-500 text-white p-1 h-6 w-6 rounded-full flex items-center justify-center">
+                          <Crown className="h-3 w-3" />
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <p className="text-center text-muted-foreground">Nenhum avatar encontrado.</p>
           )}
           
-          {!isPremium && availableAvatars.some(avatar => avatar.isPremium) && (
+          {/* Mensagem informativa para avatares premium */}
+          {availableAvatars.some(avatar => avatar.isPremium) && (
             <div className="text-center text-sm text-muted-foreground mt-4">
-              <p>Avatares com <Crown className="inline h-4 w-4 text-yellow-500" /> são exclusivos para usuários Premium</p>
+              <p>
+                <Crown className="inline h-4 w-4 text-yellow-500 mr-1" />
+                Avatares premium podem requerer assinatura Premium e/ou a conclusão do anime relacionado.
+              </p>
             </div>
           )}
         </div>
