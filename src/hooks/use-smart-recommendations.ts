@@ -123,69 +123,104 @@ async function fetchPopularAnimes(): Promise<RecommendationAnime[]> {
 }
 
 function extractUserGenres(userAnimes: any[]): string[] {
-  console.log('Analisando gêneros dos animes do usuário:', userAnimes.length);
+  console.log('=== ANÁLISE DE GÊNEROS ===');
+  console.log('Animes do usuário recebidos:', userAnimes?.length || 0);
   
+  // Mesmo com poucos animes, tenta extrair gêneros
   if (!userAnimes || userAnimes.length === 0) {
-    console.log('Usuário não tem animes, retornando gêneros padrão');
-    return ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy'];
+    console.log('Usuário não tem animes, usando gêneros populares');
+    return ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Romance'];
   }
 
   const genreCount: Record<string, number> = {};
   
-  // Conta os gêneros dos animes que o usuário assistiu/está assistindo
-  userAnimes.forEach(anime => {
-    // Simula gêneros baseados no título (em um app real, você teria esses dados)
+  // Analisa cada anime do usuário
+  userAnimes.forEach((anime, index) => {
+    console.log(`Analisando anime ${index + 1}: ${anime.title}`);
     const simulatedGenres = getSimulatedGenres(anime.title);
+    console.log(`Gêneros identificados para "${anime.title}":`, simulatedGenres);
+    
     simulatedGenres.forEach(genre => {
       genreCount[genre] = (genreCount[genre] || 0) + 1;
     });
   });
   
-  // Retorna os gêneros mais populares do usuário
+  console.log('Contagem final de gêneros:', genreCount);
+  
+  // Pega os gêneros mais frequentes
   const topGenres = Object.entries(genreCount)
     .sort(([,a], [,b]) => b - a)
-    .slice(0, 5)
+    .slice(0, 6) // Aumenta para 6 gêneros
     .map(([genre]) => genre);
     
-  console.log('Gêneros identificados do usuário:', topGenres);
+  console.log('Top gêneros selecionados:', topGenres);
   
-  // Se não encontrou gêneros suficientes, adiciona alguns padrão
-  if (topGenres.length < 3) {
-    topGenres.push('Action', 'Adventure', 'Comedy');
+  // Garante pelo menos 3 gêneros mesmo com poucos animes
+  const fallbackGenres = ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Romance'];
+  while (topGenres.length < 3) {
+    const nextGenre = fallbackGenres.find(genre => !topGenres.includes(genre));
+    if (nextGenre) {
+      topGenres.push(nextGenre);
+    } else {
+      break;
+    }
   }
   
+  console.log('Gêneros finais (com fallbacks):', topGenres);
   return topGenres;
 }
 
 function getSimulatedGenres(title: string): string[] {
-  // Simula gêneros baseados em palavras-chave no título
   const lowerTitle = title.toLowerCase();
   const genres: string[] = [];
   
-  if (lowerTitle.includes('love') || lowerTitle.includes('heart') || lowerTitle.includes('romance')) genres.push('Romance');
-  if (lowerTitle.includes('dragon') || lowerTitle.includes('battle') || lowerTitle.includes('fight') || lowerTitle.includes('war')) genres.push('Action');
-  if (lowerTitle.includes('school') || lowerTitle.includes('high') || lowerTitle.includes('student')) genres.push('School');
-  if (lowerTitle.includes('magic') || lowerTitle.includes('fantasy') || lowerTitle.includes('demon') || lowerTitle.includes('witch')) genres.push('Fantasy');
-  if (lowerTitle.includes('funny') || lowerTitle.includes('comedy') || lowerTitle.includes('gag')) genres.push('Comedy');
-  if (lowerTitle.includes('slice') || lowerTitle.includes('life') || lowerTitle.includes('daily')) genres.push('Slice of Life');
-  if (lowerTitle.includes('adventure') || lowerTitle.includes('journey') || lowerTitle.includes('quest')) genres.push('Adventure');
-  if (lowerTitle.includes('mystery') || lowerTitle.includes('detective') || lowerTitle.includes('crime')) genres.push('Mystery');
-  if (lowerTitle.includes('sport') || lowerTitle.includes('game') || lowerTitle.includes('team')) genres.push('Sports');
-  if (lowerTitle.includes('mecha') || lowerTitle.includes('robot') || lowerTitle.includes('gundam')) genres.push('Mecha');
+  // Análise mais abrangente de gêneros
+  if (lowerTitle.includes('love') || lowerTitle.includes('heart') || lowerTitle.includes('romance') || lowerTitle.includes('koi')) {
+    genres.push('Romance');
+  }
+  if (lowerTitle.includes('dragon') || lowerTitle.includes('battle') || lowerTitle.includes('fight') || lowerTitle.includes('war') || lowerTitle.includes('hero') || lowerTitle.includes('power')) {
+    genres.push('Action');
+  }
+  if (lowerTitle.includes('school') || lowerTitle.includes('high') || lowerTitle.includes('student') || lowerTitle.includes('academy') || lowerTitle.includes('class')) {
+    genres.push('School');
+  }
+  if (lowerTitle.includes('magic') || lowerTitle.includes('fantasy') || lowerTitle.includes('demon') || lowerTitle.includes('witch') || lowerTitle.includes('wizard')) {
+    genres.push('Fantasy');
+  }
+  if (lowerTitle.includes('funny') || lowerTitle.includes('comedy') || lowerTitle.includes('gag') || lowerTitle.includes('laugh')) {
+    genres.push('Comedy');
+  }
+  if (lowerTitle.includes('slice') || lowerTitle.includes('life') || lowerTitle.includes('daily') || lowerTitle.includes('everyday')) {
+    genres.push('Slice of Life');
+  }
+  if (lowerTitle.includes('adventure') || lowerTitle.includes('journey') || lowerTitle.includes('quest') || lowerTitle.includes('travel')) {
+    genres.push('Adventure');
+  }
+  if (lowerTitle.includes('mystery') || lowerTitle.includes('detective') || lowerTitle.includes('crime') || lowerTitle.includes('investigation')) {
+    genres.push('Mystery');
+  }
+  if (lowerTitle.includes('sport') || lowerTitle.includes('game') || lowerTitle.includes('team') || lowerTitle.includes('match')) {
+    genres.push('Sports');
+  }
+  if (lowerTitle.includes('mecha') || lowerTitle.includes('robot') || lowerTitle.includes('gundam') || lowerTitle.includes('machine')) {
+    genres.push('Mecha');
+  }
+  if (lowerTitle.includes('supernatural') || lowerTitle.includes('ghost') || lowerTitle.includes('spirit') || lowerTitle.includes('vampire')) {
+    genres.push('Supernatural');
+  }
+  if (lowerTitle.includes('drama') || lowerTitle.includes('emotion') || lowerTitle.includes('tear') || lowerTitle.includes('sad')) {
+    genres.push('Drama');
+  }
   
-  // Se não encontrou nenhum gênero específico, adiciona alguns padrão baseado em padrões comuns
+  // Se não encontrou gêneros específicos, adiciona baseado em padrões
   if (genres.length === 0) {
-    // Verifica se parece com anime shounen típico
-    if (lowerTitle.includes('hero') || lowerTitle.includes('power') || lowerTitle.includes('strong')) {
-      genres.push('Action', 'Adventure');
-    }
-    // Verifica se parece com anime escolar
-    else if (lowerTitle.includes('academy') || lowerTitle.includes('class') || lowerTitle.includes('student')) {
-      genres.push('School', 'Comedy');
-    }
-    // Padrão geral
-    else {
-      genres.push('Drama', 'Comedy');
+    // Tenta identificar por palavras-chave comuns em animes
+    if (lowerTitle.includes('no') || lowerTitle.includes('wa') || lowerTitle.includes('ga')) {
+      genres.push('Drama', 'Comedy'); // Animes japoneses típicos
+    } else if (lowerTitle.includes('attack') || lowerTitle.includes('titan') || lowerTitle.includes('kill')) {
+      genres.push('Action', 'Drama');
+    } else {
+      genres.push('Adventure', 'Comedy'); // Fallback padrão
     }
   }
   
@@ -198,7 +233,9 @@ export function useSmartRecommendations(isPremium: boolean) {
   const query = useQuery({
     queryKey: ['smart-recommendations', userAnimes?.length, isPremium],
     queryFn: async () => {
-      console.log('Iniciando busca de recomendações...', { isPremium, userAnimesCount: userAnimes?.length });
+      console.log('=== INICIANDO BUSCA DE RECOMENDAÇÕES ===');
+      console.log('Premium:', isPremium);
+      console.log('Total de animes do usuário:', userAnimes?.length || 0);
       
       if (!isPremium) {
         console.log('Usuário não é premium, retornando dados vazios');
@@ -217,58 +254,59 @@ export function useSmartRecommendations(isPremium: boolean) {
         const userGenres = extractUserGenres(userAnimes || []);
         genres = userGenres;
         
-        // Tenta buscar por gêneros do usuário
+        console.log('=== BUSCANDO RECOMENDAÇÕES POR GÊNERO ===');
         recommendations = await fetchRecommendationsByGenre(userGenres);
+        console.log('Recomendações encontradas por gênero:', recommendations.length);
         
-        // Se não conseguiu recomendações suficientes, busca animes populares
-        if (recommendations.length < 5) {
-          console.log('Poucas recomendações encontradas, buscando animes populares...');
-          const popularAnimes = await fetchPopularAnimes();
-          recommendations = [...recommendations, ...popularAnimes];
-          
-          // Remove duplicatas
-          recommendations = recommendations.reduce((acc, current) => {
-            const exists = acc.find(item => item.mal_id === current.mal_id);
-            if (!exists) {
-              acc.push(current);
-            }
-            return acc;
-          }, [] as RecommendationAnime[]);
-        }
+        // Sempre busca animes populares para complementar
+        console.log('=== COMPLEMENTANDO COM ANIMES POPULARES ===');
+        const popularAnimes = await fetchPopularAnimes();
+        console.log('Animes populares encontrados:', popularAnimes.length);
+        
+        // Combina recomendações por gênero com populares
+        const allRecommendations = [...recommendations, ...popularAnimes];
+        
+        // Remove duplicatas
+        recommendations = allRecommendations.reduce((acc, current) => {
+          const exists = acc.find(item => item.mal_id === current.mal_id);
+          if (!exists) {
+            acc.push(current);
+          }
+          return acc;
+        }, [] as RecommendationAnime[]);
+        
+        console.log('Total após combinar e remover duplicatas:', recommendations.length);
         
         // Remove animes que o usuário já tem na lista
         if (userAnimes && userAnimes.length > 0) {
           const userAnimeIds = userAnimes.map(anime => anime.anime_id);
+          const beforeFilter = recommendations.length;
           recommendations = recommendations.filter(rec => 
             !userAnimeIds.includes(rec.mal_id.toString())
           );
-          console.log('Após filtrar animes já assistidos:', recommendations.length);
+          console.log(`Filtrados ${beforeFilter - recommendations.length} animes já assistidos`);
+          console.log('Recomendações finais:', recommendations.length);
         }
         
       } catch (error) {
         console.error('Erro ao buscar recomendações:', error);
         // Em caso de erro, busca animes populares como fallback
         recommendations = await fetchPopularAnimes();
+        console.log('Usando fallback - animes populares:', recommendations.length);
       }
 
-      // Extrai todos os gêneros únicos das recomendações
+      // Extrai gêneros das recomendações e trending
       const allGenres = new Set<string>();
-      recommendations.forEach(anime => {
-        anime.genres.forEach(genre => {
-          allGenres.add(genre.name);
-        });
-      });
-      trendingAnimes.forEach(anime => {
+      [...recommendations, ...trendingAnimes].forEach(anime => {
         anime.genres.forEach(genre => {
           allGenres.add(genre.name);
         });
       });
 
-      console.log('Resultado final:', {
-        recommendations: recommendations.length,
-        trending: trendingAnimes.length,
-        genres: Array.from(allGenres).length
-      });
+      console.log('=== RESULTADO FINAL ===');
+      console.log('Recomendações personalizadas:', recommendations.length);
+      console.log('Animes em alta:', trendingAnimes.length);
+      console.log('Gêneros únicos encontrados:', Array.from(allGenres).length);
 
       return {
         recommendations: recommendations.slice(0, 20),
