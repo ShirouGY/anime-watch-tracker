@@ -79,6 +79,29 @@ async function fetchRecommendationsByGenre(genres: string[]): Promise<Recommenda
   return uniqueRecommendations.slice(0, 20);
 }
 
+async function fetchTrendingAnimes(): Promise<RecommendationAnime[]> {
+  try {
+    const response = await fetch(`${JIKAN_API_BASE}/top/anime?limit=20`);
+    if (response.ok) {
+      const data = await response.json();
+      return data.data?.map((anime: any) => ({
+        mal_id: anime.mal_id,
+        title: anime.title,
+        images: anime.images,
+        score: anime.score || 0,
+        episodes: anime.episodes || 0,
+        year: anime.year,
+        genres: anime.genres || [],
+        synopsis: anime.synopsis || '',
+        matchPercentage: Math.floor(Math.random() * 20) + 80
+      })) || [];
+    }
+  } catch (error) {
+    console.error('Erro ao buscar animes em alta:', error);
+  }
+  return [];
+}
+
 function extractUserGenres(userAnimes: any[]): string[] {
   const genreCount: Record<string, number> = {};
   
@@ -117,18 +140,30 @@ function getSimulatedGenres(title: string): string[] {
   return genres;
 }
 
-export function useSmartRecommendations() {
+export function useSmartRecommendations(isPremium: boolean) {
   const { data: userAnimes } = useAnimeLists();
   
-  return useQuery({
-    queryKey: ['smart-recommendations', userAnimes?.length],
+  const query = useQuery({
+    queryKey: ['smart-recommendations', userAnimes?.length, isPremium],
     queryFn: async () => {
+      if (!isPremium) {
+        return {
+          recommendations: [],
+          trendingAnimes: [],
+          genres: []
+        };
+      }
+
+      let recommendations: RecommendationAnime[] = [];
+      const trendingAnimes = await fetchTrendingAnimes();
+      let genres: string[] = [];
+
       if (!userAnimes || userAnimes.length === 0) {
         // Se usuário não tem animes, retorna recomendações populares gerais
         const response = await fetch(`${JIKAN_API_BASE}/anime?order_by=popularity&limit=15`);
         if (response.ok) {
           const data = await response.json();
-          return data.data?.map((anime: any) => ({
+          recommendations = data.data?.map((anime: any) => ({
             mal_id: anime.mal_id,
             title: anime.title,
             images: anime.images,
@@ -140,16 +175,42 @@ export function useSmartRecommendations() {
             matchPercentage: Math.floor(Math.random() * 20) + 60
           })) || [];
         }
-        return [];
+      } else {
+        const userGenres = extractUserGenres(userAnimes);
+        genres = userGenres;
+        const mappedGenres = userGenres.map(genre => genreMap[genre] || genre);
+        recommendations = await fetchRecommendationsByGenre(mappedGenres);
       }
-      
-      const userGenres = extractUserGenres(userAnimes);
-      const mappedGenres = userGenres.map(genre => genreMap[genre] || genre);
-      
-      return await fetchRecommendationsByGenre(mappedGenres);
+
+      // Extrai todos os gêneros únicos das recomendações
+      const allGenres = new Set<string>();
+      recommendations.forEach(anime => {
+        anime.genres.forEach(genre => {
+          allGenres.add(genre.name);
+        });
+      });
+      trendingAnimes.forEach(anime => {
+        anime.genres.forEach(genre => {
+          allGenres.add(genre.name);
+        });
+      });
+
+      return {
+        recommendations,
+        trendingAnimes,
+        genres: Array.from(allGenres)
+      };
     },
     enabled: true,
     staleTime: 1000 * 60 * 30, // 30 minutos
     refetchOnWindowFocus: false,
   });
+
+  return {
+    recommendations: query.data?.recommendations || [],
+    trendingAnimes: query.data?.trendingAnimes || [],
+    isLoading: query.isLoading,
+    error: query.error?.message,
+    genres: query.data?.genres || []
+  };
 }

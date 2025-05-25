@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const RecommendationsPage = () => {
   const { user, session } = useAuth();
-  const { subscriptionData } = useSubscription();
+  const { subscriptionData, isLoading: subscriptionLoading, checkSubscription } = useSubscription();
   const { toast } = useToast();
   const [selectedGenre, setSelectedGenre] = useState<string>("");
   
@@ -31,6 +31,14 @@ const RecommendationsPage = () => {
     error,
     genres
   } = useSmartRecommendations(isPremium);
+
+  // Força verificação da assinatura quando a página carrega
+  useEffect(() => {
+    if (user && session && !subscriptionLoading) {
+      console.log('Verificando status da assinatura...', { subscribed: subscriptionData?.subscribed });
+      checkSubscription();
+    }
+  }, [user, session]);
 
   const addToList = async (animeData: any) => {
     if (!user || !session) {
@@ -73,6 +81,15 @@ const RecommendationsPage = () => {
     }
   };
 
+  if (subscriptionLoading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="ml-2">Verificando sua assinatura...</p>
+      </div>
+    );
+  }
+
   if (!isPremium) {
     return (
       <div className="space-y-6 animate-fade-in">
@@ -85,6 +102,16 @@ const RecommendationsPage = () => {
             Descubra animes personalizados baseados no seu histórico de visualização. 
             Nosso algoritmo inteligente analisa seus gostos e sugere títulos perfeitos para você.
           </p>
+          
+          <div className="flex gap-4 justify-center mb-8">
+            <Button onClick={checkSubscription} variant="outline">
+              Verificar Status Premium
+            </Button>
+            <Button onClick={() => window.location.href = '/perfil'} className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600">
+              <Crown className="h-4 w-4 mr-2" />
+              Assinar Premium
+            </Button>
+          </div>
           
           <Card className="max-w-md mx-auto">
             <CardHeader>
