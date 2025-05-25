@@ -5,6 +5,7 @@ import { AddAnimeDialog } from "@/components/AddAnimeDialog";
 import { useAnimeLists, useUpdateAnime, useDeleteAnime } from "@/hooks/use-anime-lists";
 import { AnimeListTab } from "@/components/anime/AnimeListTab";
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const ListsPage = () => {
   const { toast } = useToast();
@@ -13,6 +14,7 @@ const ListsPage = () => {
   const updateAnimeMutation = useUpdateAnime();
   const deleteAnimeMutation = useDeleteAnime();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
 
   const isPremium = user?.user_metadata?.is_premium;
 
@@ -43,30 +45,32 @@ const ListsPage = () => {
   };
   
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <h1 className="text-2xl lg:text-3xl font-bold">Minhas Listas</h1>
-        <div className="w-full lg:w-auto">
+    <div className="space-y-4 animate-fade-in w-full">
+      <div className="flex flex-col gap-4">
+        <h1 className={`font-bold text-foreground ${isMobile ? 'text-xl' : 'text-2xl lg:text-3xl'}`}>
+          Minhas Listas
+        </h1>
+        <div className="w-full">
           <AddAnimeDialog />
         </div>
       </div>
       
       <Tabs defaultValue="watchlist" className="w-full">
-        <TabsList className="mb-4 w-full lg:w-auto grid grid-cols-2 lg:grid-cols-3 h-auto">
-          <TabsTrigger value="watchlist" className="text-sm px-4 py-2">
+        <TabsList className={`mb-4 w-full grid h-auto ${isPremium ? 'grid-cols-3' : 'grid-cols-2'}`}>
+          <TabsTrigger value="watchlist" className={`text-xs px-2 py-2 ${isMobile ? 'text-xs' : 'text-sm px-4'}`}>
             Quero Assistir
           </TabsTrigger>
-          <TabsTrigger value="watched" className="text-sm px-4 py-2">
+          <TabsTrigger value="watched" className={`text-xs px-2 py-2 ${isMobile ? 'text-xs' : 'text-sm px-4'}`}>
             Assistidos
           </TabsTrigger>
           {isPremium && (
-            <TabsTrigger value="recommended" className="text-sm px-4 py-2 col-span-2 lg:col-span-1">
+            <TabsTrigger value="recommended" className={`text-xs px-2 py-2 ${isMobile ? 'text-xs' : 'text-sm px-4'}`}>
               Recomendados
             </TabsTrigger>
           )}
         </TabsList>
         
-        <TabsContent value="watchlist">
+        <TabsContent value="watchlist" className="w-full">
           <AnimeListTab
             animes={watchlistAnimes}
             isLoading={loadingWatchlist}
@@ -75,7 +79,7 @@ const ListsPage = () => {
           />
         </TabsContent>
         
-        <TabsContent value="watched">
+        <TabsContent value="watched" className="w-full">
           <AnimeListTab
             animes={watchedAnimes}
             isLoading={loadingWatched}
@@ -86,7 +90,7 @@ const ListsPage = () => {
         </TabsContent>
 
         {isPremium && (
-          <TabsContent value="recommended">
+          <TabsContent value="recommended" className="w-full">
             <div className="text-center py-10">
                <p className="text-muted-foreground">Conteúdo de recomendações para usuários Premium.</p>
             </div>
