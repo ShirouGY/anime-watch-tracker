@@ -15,13 +15,13 @@ export function AppLayout() {
       <SidebarProvider>
         <div className="flex w-full min-h-screen">
           <AppSidebar />
-          <main className="flex-1 overflow-auto w-full min-w-0">
+          <main className="flex-1 w-full min-w-0">
             <div className={cn(
-              "w-full mx-auto",
-              isMobile ? "p-2 pb-16" : "p-4 pb-16 max-w-7xl"
+              "w-full h-full",
+              isMobile ? "p-3 pb-16" : "p-6 pb-16 max-w-7xl mx-auto"
             )}>
               <div className={cn(
-                "flex items-center mb-4",
+                "flex items-center mb-6",
                 isMobile ? "justify-between" : "justify-end"
               )}>
                 {isMobile && (
