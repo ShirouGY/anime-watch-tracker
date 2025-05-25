@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   Dialog, 
@@ -8,12 +9,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Crown } from "lucide-react";
 
 interface AvatarFile {
   id: string;
@@ -24,15 +25,23 @@ interface AvatarFile {
   metadata: Record<string, any>;
 }
 
+interface AvatarOption {
+  url: string;
+  isPremium: boolean;
+  name: string;
+}
+
 export function AvatarSelector({
   currentAvatar,
-  onAvatarChange
+  onAvatarChange,
+  isPremium = false
 }: {
   currentAvatar: string | null;
   onAvatarChange: (url: string) => void;
+  isPremium?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [availableAvatars, setAvailableAvatars] = useState<string[]>([]);
+  const [availableAvatars, setAvailableAvatars] = useState<AvatarOption[]>([]);
   const [loadingAvatars, setLoadingAvatars] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -41,43 +50,95 @@ export function AvatarSelector({
     if (isOpen && availableAvatars.length === 0) {
       const fetchAvatars = async () => {
         setLoadingAvatars(true);
-        const { data, error } = await supabase.storage.from('avatars').list();
         
-        if (error) {
-          console.error("Erro ao listar avatares do bucket:", error);
+        try {
+          // Fetch free icons
+          const { data: freeIcons, error: freeError } = await supabase.storage
+            .from('avatar-icons')
+            .list('icons_free');
+
+          if (freeError) {
+            console.error("Erro ao listar ícones gratuitos:", freeError);
+          }
+
+          // Fetch premium icons
+          const { data: premiumIcons, error: premiumError } = await supabase.storage
+            .from('avatar-icons')
+            .list('icons_premium');
+
+          if (premiumError) {
+            console.error("Erro ao listar ícones premium:", premiumError);
+          }
+
+          const allAvatars: AvatarOption[] = [];
+
+          // Process free icons
+          if (freeIcons) {
+            freeIcons.forEach((file: AvatarFile) => {
+              const { data: { publicUrl } } = supabase.storage
+                .from('avatar-icons')
+                .getPublicUrl(`icons_free/${file.name}`);
+              
+              allAvatars.push({
+                url: publicUrl,
+                isPremium: false,
+                name: file.name
+              });
+            });
+          }
+
+          // Process premium icons
+          if (premiumIcons) {
+            premiumIcons.forEach((file: AvatarFile) => {
+              const { data: { publicUrl } } = supabase.storage
+                .from('avatar-icons')
+                .getPublicUrl(`icons_premium/${file.name}`);
+              
+              allAvatars.push({
+                url: publicUrl,
+                isPremium: true,
+                name: file.name
+              });
+            });
+          }
+
+          setAvailableAvatars(allAvatars);
+        } catch (error) {
+          console.error("Erro geral ao buscar avatares:", error);
           toast({
             variant: "destructive",
             description: "Erro ao carregar opções de avatar."
           });
+        } finally {
           setLoadingAvatars(false);
-          return;
         }
-
-        const avatarUrls = data.map((file: AvatarFile) => {
-            const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(file.name);
-            return publicUrl;
-        }).filter(url => url !== null);
-
-        setAvailableAvatars(avatarUrls);
-        setLoadingAvatars(false);
       };
 
       fetchAvatars();
     }
   }, [isOpen, availableAvatars.length, toast]);
 
-  const handleSelectAvatar = async (url: string) => {
+  const handleSelectAvatar = async (avatarOption: AvatarOption) => {
     if (!user) return;
+
+    // Check if user can access premium avatars
+    if (avatarOption.isPremium && !isPremium) {
+      toast({
+        variant: "destructive",
+        description: "Este avatar é exclusivo para usuários Premium!"
+      });
+      return;
+    }
 
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ avatar_url: url })
+        .update({ avatar_url: avatarOption.url })
         .eq('id', user.id);
 
       if (error) throw error;
 
-      onAvatarChange(url);
+      onAvatarChange(avatarOption.url);
       toast({
         description: "Avatar atualizado com sucesso!"
       });
@@ -132,26 +193,45 @@ export function AvatarSelector({
             </div>
           ) : availableAvatars.length > 0 ? (
             <div className="grid grid-cols-3 gap-4">
-              {availableAvatars.map((avatarUrl, index) => (
+              {availableAvatars.map((avatarOption, index) => (
                 <div key={index} className="flex flex-col items-center gap-2">
-                  <button
-                    className={`rounded-full overflow-hidden border-2 transition-all ${
-                      currentAvatar === avatarUrl
-                        ? "border-anime-purple scale-110"
-                        : "border-transparent hover:border-anime-purple/50"
-                    }`}
-                    onClick={() => handleSelectAvatar(avatarUrl)}
-                  >
-                    <Avatar className="h-20 w-20">
-                      <AvatarImage src={avatarUrl} alt={`Avatar ${index + 1}`} />
-                      <AvatarFallback>{`A${index + 1}`}</AvatarFallback>
-                    </Avatar>
-                  </button>
+                  <div className="relative">
+                    <button
+                      className={`rounded-full overflow-hidden border-2 transition-all ${
+                        currentAvatar === avatarOption.url
+                          ? "border-anime-purple scale-110"
+                          : "border-transparent hover:border-anime-purple/50"
+                      } ${
+                        avatarOption.isPremium && !isPremium 
+                          ? "opacity-50 cursor-not-allowed" 
+                          : "cursor-pointer"
+                      }`}
+                      onClick={() => handleSelectAvatar(avatarOption)}
+                      disabled={avatarOption.isPremium && !isPremium}
+                    >
+                      <Avatar className="h-20 w-20">
+                        <AvatarImage src={avatarOption.url} alt={`Avatar ${index + 1}`} />
+                        <AvatarFallback>{`A${index + 1}`}</AvatarFallback>
+                      </Avatar>
+                    </button>
+                    
+                    {avatarOption.isPremium && (
+                      <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-500 to-amber-500 text-white p-1 h-6 w-6 rounded-full flex items-center justify-center">
+                        <Crown className="h-3 w-3" />
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
-             <p className="text-center text-muted-foreground">Nenhum avatar encontrado no bucket.</p>
+            <p className="text-center text-muted-foreground">Nenhum avatar encontrado.</p>
+          )}
+          
+          {!isPremium && availableAvatars.some(avatar => avatar.isPremium) && (
+            <div className="text-center text-sm text-muted-foreground mt-4">
+              <p>Avatares com <Crown className="inline h-4 w-4 text-yellow-500" /> são exclusivos para usuários Premium</p>
+            </div>
           )}
         </div>
       </DialogContent>
