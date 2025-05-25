@@ -1,12 +1,13 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Medal, Star, Clock, BookOpen, Lock, Crown } from "lucide-react";
+import { Trophy, Medal, Star, Clock, BookOpen, Lock, Crown, CheckCircle } from "lucide-react";
 import { useUserAchievements } from "@/hooks/use-anime-progress";
 import { useAnimeLists } from "@/hooks/use-anime-lists";
 import { useAuth } from "@/contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { usePremiumAvatarProgress } from "@/hooks/use-avatar-unlocks";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function AchievementsSection() {
   const { user } = useAuth();
@@ -14,6 +15,7 @@ export function AchievementsSection() {
   const { data: watchedAnimes } = useAnimeLists('completed');
   const { data: watchingAnimes } = useAnimeLists('watching');
   const { data: planToWatchAnimes } = useAnimeLists('plan_to_watch');
+  const { data: premiumAvatarProgress } = usePremiumAvatarProgress();
   
   const totalWatched = watchedAnimes ? watchedAnimes.length : 0;
   const totalHours = watchedAnimes 
@@ -24,39 +26,6 @@ export function AchievementsSection() {
     : 0;
   
   const isPremium = user?.user_metadata?.is_premium;
-
-  // Buscar avatares premium para mostrar progresso
-  const { data: premiumAvatars } = useQuery({
-    queryKey: ['premium-avatars'],
-    queryFn: async () => {
-      const { data, error } = await supabase.storage
-        .from('avatar-icons')
-        .list('icons_premium');
-
-      if (error) throw error;
-
-      // Mapeamento simplificado - você pode expandir isso
-      const AVATAR_ANIME_MAPPING: Record<string, { animeId: string; animeTitle: string }> = {
-        'naruto.png': { animeId: '20', animeTitle: 'Naruto' },
-        'sasuke.png': { animeId: '20', animeTitle: 'Naruto' },
-        'goku.png': { animeId: '223', animeTitle: 'Dragon Ball Z' },
-        'vegeta.png': { animeId: '223', animeTitle: 'Dragon Ball Z' },
-        'luffy.png': { animeId: '21', animeTitle: 'One Piece' },
-        'zoro.png': { animeId: '21', animeTitle: 'One Piece' },
-      };
-
-      return data?.map(file => ({
-        name: file.name,
-        ...AVATAR_ANIME_MAPPING[file.name]
-      })).filter(avatar => avatar.animeId) || [];
-    },
-    enabled: isPremium
-  });
-
-  // Calcular avatares desbloqueados
-  const unlockedAvatars = premiumAvatars?.filter(avatar => 
-    watchedAnimes?.some(anime => anime.anime_id === avatar.animeId)
-  ) || [];
 
   // Definir todas as conquistas possíveis
   const allAchievements = [
@@ -182,21 +151,6 @@ export function AchievementsSection() {
       isPremium: true
     }
   ];
-
-  // Adicionar conquista de avatares se o usuário for premium
-  if (isPremium && premiumAvatars) {
-    allAchievements.push({
-      id: 'avatar_collector',
-      name: "Colecionador de Avatares",
-      description: "Desbloqueie avatares premium assistindo animes",
-      icon: Crown,
-      category: "Avatares",
-      requirement: premiumAvatars.length,
-      current: unlockedAvatars.length,
-      type: "avatar_unlocks",
-      isPremium: true
-    });
-  }
   
   // Verificar quais conquistas o usuário já desbloqueou
   const unlockedAchievementIds = userAchievements?.map(a => a.achievement_type) || [];
@@ -207,8 +161,7 @@ export function AchievementsSection() {
                      (achievement.type === 'watched_count' && isAchieved) ||
                      (achievement.type === 'ratings_count' && isAchieved) ||
                      (achievement.type === 'hours_watched' && isAchieved) ||
-                     (achievement.type === 'total_collection' && isAchieved) ||
-                     (achievement.type === 'avatar_unlocks' && isAchieved);
+                     (achievement.type === 'total_collection' && isAchieved);
     
     const progress = Math.min((achievement.current / achievement.requirement) * 100, 100);
     
@@ -239,38 +192,93 @@ export function AchievementsSection() {
       </div>
 
       {/* Seção especial para avatares premium */}
-      {isPremium && premiumAvatars && premiumAvatars.length > 0 && (
+      {isPremium && premiumAvatarProgress && premiumAvatarProgress.length > 0 && (
         <div className="space-y-3">
-          <h4 className="font-medium text-anime-purple">Progresso de Avatares Premium</h4>
+          <h4 className="font-medium text-anime-purple flex items-center gap-2">
+            <Crown className="h-4 w-4" />
+            Progresso de Avatares Premium
+          </h4>
           <Card className="border-anime-purple/30">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Avatares Desbloqueados</span>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm">Desbloqueie avatares assistindo animes</CardTitle>
                 <span className="text-sm text-muted-foreground">
-                  {unlockedAvatars.length} / {premiumAvatars.length}
+                  {premiumAvatarProgress.filter(a => a.isUnlocked).length} / {premiumAvatarProgress.length}
                 </span>
               </div>
               <Progress 
-                value={(unlockedAvatars.length / premiumAvatars.length) * 100} 
-                className="h-2 mb-3" 
+                value={(premiumAvatarProgress.filter(a => a.isUnlocked).length / premiumAvatarProgress.length) * 100} 
+                className="h-2" 
               />
-              <div className="space-y-1">
-                {premiumAvatars.map((avatar, index) => {
-                  const isUnlocked = unlockedAvatars.some(ua => ua.animeId === avatar.animeId);
-                  return (
-                    <div key={index} className="flex items-center justify-between text-xs">
-                      <span className={isUnlocked ? "text-green-600" : "text-muted-foreground"}>
-                        {avatar.animeTitle}
-                      </span>
-                      {isUnlocked ? (
-                        <Crown className="h-3 w-3 text-anime-purple" />
-                      ) : (
-                        <Lock className="h-3 w-3 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="grid gap-3 md:grid-cols-2">
+                {premiumAvatarProgress.map((avatar, index) => (
+                  <div key={index} className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
+                    avatar.isUnlocked 
+                      ? 'border-anime-purple/50 bg-anime-purple/5' 
+                      : 'border-border bg-background hover:border-anime-purple/30'
+                  }`}>
+                    <div className="relative">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={avatar.avatarUrl} alt={avatar.avatarName} />
+                        <AvatarFallback>A</AvatarFallback>
+                      </Avatar>
+                      {avatar.isUnlocked && (
+                        <div className="absolute -top-1 -right-1 bg-anime-purple rounded-full p-1">
+                          <CheckCircle className="h-3 w-3 text-white" />
+                        </div>
+                      )}
+                      {!avatar.isUnlocked && (
+                        <div className="absolute -top-1 -right-1 bg-gray-500 rounded-full p-1">
+                          <Lock className="h-3 w-3 text-white" />
+                        </div>
                       )}
                     </div>
-                  );
-                })}
+                    
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {avatar.animeTitle}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {avatar.isUnlocked ? (
+                          <span className="text-anime-purple font-medium">✓ Desbloqueado</span>
+                        ) : (
+                          "Assista para desbloquear"
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
+              
+              {premiumAvatarProgress.length === 0 && (
+                <div className="text-center py-4 text-muted-foreground">
+                  <Crown className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Nenhum avatar premium encontrado</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {!isPremium && (
+        <div className="space-y-3">
+          <h4 className="font-medium text-anime-purple flex items-center gap-2">
+            <Crown className="h-4 w-4" />
+            Avatares Premium
+          </h4>
+          <Card className="border-amber-200 bg-amber-50/50">
+            <CardContent className="p-4 text-center">
+              <Crown className="h-8 w-8 mx-auto mb-2 text-amber-500" />
+              <p className="text-sm font-medium mb-1">Desbloqueie Avatares Exclusivos</p>
+              <p className="text-xs text-muted-foreground mb-3">
+                Torne-se Premium para desbloquear avatares únicos assistindo seus animes favoritos
+              </p>
+              <Badge className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white">
+                Upgrade para Premium
+              </Badge>
             </CardContent>
           </Card>
         </div>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   Dialog, 
@@ -17,7 +18,7 @@ import { Crown, Lock } from "lucide-react";
 import { AvatarOption, AvatarFile } from "@/types/avatar";
 import { useAvatarUnlocks } from "@/hooks/use-avatar-unlocks";
 
-// Mapeamento de arquivos de avatar para IDs de anime (você pode expandir isso)
+// Mapeamento expandido de arquivos de avatar para IDs de anime
 const AVATAR_ANIME_MAPPING: Record<string, { animeId: string; animeTitle: string }> = {
   'naruto.png': { animeId: '20', animeTitle: 'Naruto' },
   'sasuke.png': { animeId: '20', animeTitle: 'Naruto' },
@@ -25,7 +26,12 @@ const AVATAR_ANIME_MAPPING: Record<string, { animeId: string; animeTitle: string
   'vegeta.png': { animeId: '223', animeTitle: 'Dragon Ball Z' },
   'luffy.png': { animeId: '21', animeTitle: 'One Piece' },
   'zoro.png': { animeId: '21', animeTitle: 'One Piece' },
-  // Adicione mais mapeamentos conforme necessário
+  'ichigo.png': { animeId: '269', animeTitle: 'Bleach' },
+  'rukia.png': { animeId: '269', animeTitle: 'Bleach' },
+  'natsu.png': { animeId: '6702', animeTitle: 'Fairy Tail' },
+  'erza.png': { animeId: '6702', animeTitle: 'Fairy Tail' },
+  'edward.png': { animeId: '121', animeTitle: 'Fullmetal Alchemist' },
+  'alphonse.png': { animeId: '121', animeTitle: 'Fullmetal Alchemist' },
 };
 
 export function AvatarSelector({
