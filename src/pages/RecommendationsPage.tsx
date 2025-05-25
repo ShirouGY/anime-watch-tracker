@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -168,6 +167,14 @@ const RecommendationsPage = () => {
       )
     : recommendations;
 
+  const availableGenres = genres.filter(genre => genre.name !== "Trending");
+
+  const filteredTrendingAnimes = selectedGenre 
+    ? trendingAnimes.filter(anime => 
+        anime.genres.some(genre => genre.name.toLowerCase() === selectedGenre.toLowerCase())
+      )
+    : trendingAnimes;
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -186,13 +193,16 @@ const RecommendationsPage = () => {
       </div>
 
       {/* Genre Filter */}
-      {genres.length > 0 && (
+      {availableGenres.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Filter className="h-5 w-5" />
               Filtrar por Gênero
             </CardTitle>
+            <CardDescription>
+              {selectedGenre ? `Mostrando resultados para: ${selectedGenre}` : 'Selecione um gênero para filtrar'}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
@@ -203,7 +213,7 @@ const RecommendationsPage = () => {
               >
                 Todos
               </Button>
-              {genres.slice(0, 10).map((genre) => (
+              {availableGenres.map((genre) => (
                 <Button
                   key={genre}
                   variant={selectedGenre === genre ? "default" : "outline"}
@@ -230,6 +240,7 @@ const RecommendationsPage = () => {
               <CardTitle>Recomendações Personalizadas</CardTitle>
               <CardDescription>
                 Baseado em {watchedAnimes?.length || 0} animes assistidos e {watchingAnimes?.length || 0} animes assistindo
+                {selectedGenre && ` • Filtrado por: ${selectedGenre}`}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -271,12 +282,13 @@ const RecommendationsPage = () => {
               </CardTitle>
               <CardDescription>
                 Os animes mais populares e bem avaliados da temporada
+                {selectedGenre && ` • Filtrado por: ${selectedGenre}`}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {trendingAnimes.length > 0 ? (
+              {filteredTrendingAnimes.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {trendingAnimes.map((anime) => (
+                  {filteredTrendingAnimes.map((anime) => (
                     <SmartRecommendationCard
                       key={anime.mal_id}
                       anime={anime}
@@ -286,9 +298,17 @@ const RecommendationsPage = () => {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground">
-                    Carregando animes em alta...
+                  <p className="text-muted-foreground mb-4">
+                    {selectedGenre 
+                      ? `Nenhum anime em alta encontrado para o gênero "${selectedGenre}"`
+                      : "Carregando animes em alta..."
+                    }
                   </p>
+                  {selectedGenre && (
+                    <Button variant="outline" onClick={() => setSelectedGenre("")}>
+                      Limpar Filtro
+                    </Button>
+                  )}
                 </div>
               )}
             </CardContent>
