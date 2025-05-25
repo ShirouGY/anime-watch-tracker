@@ -5,10 +5,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Clock, Crown, Medal, Star, Trophy, Lock } from "lucide-react";
+import { BookOpen, Clock, Crown, Medal, Star, Trophy, Lock, CreditCard, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAnimeLists, Anime } from "@/hooks/use-anime-lists";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/use-subscription";
 import { supabase } from "@/integrations/supabase/client";
 import { AvatarSelector } from "@/components/profile/AvatarSelector";
 import { AchievementsSection } from "@/components/profile/AchievementsSection";
@@ -31,9 +32,12 @@ const ProfilePage = () => {
   const { user } = useAuth();
   const [showAchievementsDialog, setShowAchievementsDialog] = useState(false);
   
+  // Hook de assinatura
+  const { subscriptionData, isLoading: subscriptionLoading, createCheckout, openCustomerPortal, checkSubscription } = useSubscription();
+  
   // Novo estado para armazenar avatares premium com URLs públicas
   const [premiumAvatarsWithUrls, setPremiumAvatarsWithUrls] = useState<Array<{ filename: string; url: string }>>([]);
-  const [loadingAvatars, setLoadingAvatars] = useState(true); // Estado de loading para os avatares
+  const [loadingAvatars, setLoadingAvatars] = useState(true);
   
   const { data: watchedAnimes, isLoading: loadingWatched } = useAnimeLists('completed');
   const { data: watchingAnimes, isLoading: loadingWatching } = useAnimeLists('watching');
@@ -78,14 +82,14 @@ const ProfilePage = () => {
         setLoadingAvatars(true);
         try {
           const { data, error } = await supabase.storage
-            .from('avatar-icons') // Substitua 'avatar-icons' pelo nome do seu bucket, se for diferente
+            .from('avatar-icons')
             .list('icons_premium');
 
           if (error) throw error;
 
           const avatarsWithUrls = data.map((file) => {
             const { data: { publicUrl } } = supabase.storage
-              .from('avatar-icons') // Substitua 'avatar-icons' pelo nome do seu bucket, se for diferente
+              .from('avatar-icons')
               .getPublicUrl(`icons_premium/${file.name}`);
             return { filename: file.name, url: publicUrl };
           });
@@ -102,9 +106,16 @@ const ProfilePage = () => {
       };
 
       fetchUserProfile();
-      fetchPremiumAvatars(); // Chame a nova função de busca de avatares
+      fetchPremiumAvatars();
     }
-  }, [user, isPremium, watchedAnimes]);
+  }, [user, subscriptionData?.subscribed]);
+
+  // Atualizar estado local quando os dados da assinatura mudarem
+  useEffect(() => {
+    if (subscriptionData?.subscribed !== undefined) {
+      setIsPremium(subscriptionData.subscribed);
+    }
+  }, [subscriptionData]);
   
   const isLoading = loadingWatched || loadingWatching || loadingPlanToWatch;
   
@@ -130,38 +141,6 @@ const ProfilePage = () => {
   };
   
   const otakuLevel = getOtakuLevel();
-  
-  const handleUpgradeToPremium = async () => {
-    if (!user) {
-      toast({
-        variant: "destructive",
-        description: "Usuário não autenticado.",
-      });
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ is_premium: true })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      // Se a atualização no DB for bem-sucedida:
-      setIsPremium(true); // Atualiza o estado local
-      toast({
-        title: "Parabéns!",
-        description: "Você foi atualizado para o plano Premium.",
-      });
-    } catch (error: any) {
-      console.error('Erro ao atualizar para premium:', error);
-      toast({
-        variant: "destructive",
-        description: `Erro ao atualizar para premium: ${error.message || 'Erro desconhecido'}`,
-      });
-    }
-  };
 
   const handleAvatarChange = (url: string) => {
     setAvatar(url);
@@ -169,25 +148,22 @@ const ProfilePage = () => {
   
   // Filtra avatares premium com animeId para as conquistas
   const animeLinkedPremiumAvatars = useMemo(() => {
-    // Usamos o estado premiumAvatarsWithUrls que agora contém as URLs corretas
     return premiumAvatarsWithUrls
       .map(avatarFile => {
         const mapping = AVATAR_ANIME_MAPPING[avatarFile.filename];
-        // Filtra apenas avatares que estão no mapeamento E têm um animeId associado
         if (mapping && mapping.animeId) {
           return {
             filename: avatarFile.filename,
-            url: avatarFile.url, // Usa a URL obtida do Storage
+            url: avatarFile.url,
             animeId: mapping.animeId,
             animeTitle: mapping.animeTitle,
-            // Lógica de desbloqueio: Premium E assistiu o anime
             isUnlocked: isPremium && completedAnimeIdsSet.has(mapping.animeId),
           };
         }
-        return null; // Ignora avatares no Storage que não estão mapeados ou não têm animeId
+        return null;
       })
-      .filter(avatar => avatar !== null); // Remove os itens nulos
-  }, [premiumAvatarsWithUrls, isPremium, completedAnimeIdsSet]); // Adiciona premiumAvatarsWithUrls às dependências
+      .filter(avatar => avatar !== null);
+  }, [premiumAvatarsWithUrls, isPremium, completedAnimeIdsSet]);
 
   // Calcula o progresso
   const totalAnimeLinkedAvatars = animeLinkedPremiumAvatars.length;
@@ -241,15 +217,35 @@ const ProfilePage = () => {
               {!isPremium && (
                 <div className="mt-6 w-full">
                   <Button 
-                    onClick={handleUpgradeToPremium}
+                    onClick={createCheckout}
+                    disabled={subscriptionLoading}
                     className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600"
                   >
                     <Crown className="h-4 w-4 mr-2" />
-                    Virar Premium
+                    {subscriptionLoading ? "Processando..." : "Assinar Premium - R$ 19,99/mês"}
                   </Button>
                   <p className="text-xs text-center mt-2 text-muted-foreground">
-                    Remova anúncios e desbloqueie recursos exclusivos
+                    Desbloqueie avatares exclusivos e recursos premium
                   </p>
+                </div>
+              )}
+              
+              {isPremium && (
+                <div className="mt-6 w-full space-y-2">
+                  <Button 
+                    onClick={openCustomerPortal}
+                    disabled={subscriptionLoading}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Gerenciar Assinatura
+                  </Button>
+                  {subscriptionData?.subscription_end && (
+                    <p className="text-xs text-center text-muted-foreground">
+                      Renovação: {new Date(subscriptionData.subscription_end).toLocaleDateString('pt-BR')}
+                    </p>
+                  )}
                 </div>
               )}
               
@@ -261,6 +257,15 @@ const ProfilePage = () => {
                 >
                   <Trophy size={16} className="mr-2" />
                   Conquistas
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={checkSubscription}
+                  disabled={subscriptionLoading}
+                >
+                  <CreditCard size={16} className="mr-2" />
+                  Verificar Status
                 </Button>
               </div>
             </div>
@@ -382,8 +387,8 @@ const ProfilePage = () => {
                               </svg>
                             </div>
                             <div>
-                              <h4 className="font-medium">Exportar Listas</h4>
-                              <p className="text-xs text-muted-foreground">Exporte suas listas para CSV ou JSON</p>
+                              <h4 className="font-medium">Avatares Premium</h4>
+                              <p className="text-xs text-muted-foreground">Avatares exclusivos desbloqueáveis por anime</p>
                             </div>
                           </div>
                         </CardContent>
@@ -393,31 +398,7 @@ const ProfilePage = () => {
                         <CardContent className="p-4">
                           <div className="flex items-center gap-3">
                             <div className="p-2 rounded-full bg-anime-purple/20 text-anime-purple">
-                              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M20 9H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M20 12H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M20 15H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M10 6H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M10 18H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                <rect x="14" y="3" width="6" height="6" rx="1" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                <rect x="14" y="15" width="6" height="6" rx="1" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </div>
-                            <div>
-                              <h4 className="font-medium">Temas Customizáveis</h4>
-                              <p className="text-xs text-muted-foreground">Mude as cores e o visual do app</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="border border-anime-purple/20">
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-full bg-anime-purple/20 text-anime-purple">
-                              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M19 21L12 16L5 21V5C5 4.46957 5.21071 3.96086 5.58579 3.58579C5.96086 3.21071 6.46957 3 7 3H17C17.5304 3 18.0391 3.21071 18.4142 3.58579C18.7893 3.96086 19 4.46957 19 5V21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
+                              <Crown className="h-5 w-5" />
                             </div>
                             <div>
                               <h4 className="font-medium">Sem Anúncios</h4>
@@ -431,15 +412,25 @@ const ProfilePage = () => {
                         <CardContent className="p-4">
                           <div className="flex items-center gap-3">
                             <div className="p-2 rounded-full bg-anime-purple/20 text-anime-purple">
-                              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5C21 3.89543 20.1046 3 19 3Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M9 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                <path d="M15 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
+                              <Settings className="h-5 w-5" />
                             </div>
                             <div>
                               <h4 className="font-medium">Backup na Nuvem</h4>
                               <p className="text-xs text-muted-foreground">Sincronize entre dispositivos</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="border border-anime-purple/20">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-full bg-anime-purple/20 text-anime-purple">
+                              <Trophy className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <h4 className="font-medium">Conquistas Avançadas</h4>
+                              <p className="text-xs text-muted-foreground">Sistema completo de conquistas</p>
                             </div>
                           </div>
                         </CardContent>
@@ -452,6 +443,7 @@ const ProfilePage = () => {
           </Tabs>
         </div>
       </div>
+      
       <Dialog open={showAchievementsDialog} onOpenChange={setShowAchievementsDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -484,7 +476,6 @@ const ProfilePage = () => {
                     <div className={cn("relative rounded-full overflow-hidden",
                        avatar.isUnlocked ? "border-2 border-anime-purple" : "border-2 border-transparent opacity-50"
                     )}>
-                       {/* TODO: Otimizar URL ou usar hook de avatar do storage se necessário */}
                       <Avatar className="h-16 w-16">
                         <AvatarImage src={avatar.url} alt={avatar.animeTitle} />
                         <AvatarFallback>{avatar.animeTitle?.substring(0,2) || '??'}</AvatarFallback>
