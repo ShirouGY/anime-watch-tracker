@@ -14,22 +14,20 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Crown } from "lucide-react";
+import { Crown, Lock } from "lucide-react";
+import { AvatarOption, AvatarFile } from "@/types/avatar";
+import { useAvatarUnlocks } from "@/hooks/use-avatar-unlocks";
 
-interface AvatarFile {
-  id: string;
-  name: string;
-  created_at: string;
-  updated_at: string;
-  last_accessed_at: string;
-  metadata: Record<string, any>;
-}
-
-interface AvatarOption {
-  url: string;
-  isPremium: boolean;
-  name: string;
-}
+// Mapeamento de arquivos de avatar para IDs de anime (você pode expandir isso)
+const AVATAR_ANIME_MAPPING: Record<string, { animeId: string; animeTitle: string }> = {
+  'naruto.png': { animeId: '20', animeTitle: 'Naruto' },
+  'sasuke.png': { animeId: '20', animeTitle: 'Naruto' },
+  'goku.png': { animeId: '223', animeTitle: 'Dragon Ball Z' },
+  'vegeta.png': { animeId: '223', animeTitle: 'Dragon Ball Z' },
+  'luffy.png': { animeId: '21', animeTitle: 'One Piece' },
+  'zoro.png': { animeId: '21', animeTitle: 'One Piece' },
+  // Adicione mais mapeamentos conforme necessário
+};
 
 export function AvatarSelector({
   currentAvatar,
@@ -94,10 +92,14 @@ export function AvatarSelector({
                 .from('avatar-icons')
                 .getPublicUrl(`icons_premium/${file.name}`);
               
+              const animeMapping = AVATAR_ANIME_MAPPING[file.name];
+              
               allAvatars.push({
                 url: publicUrl,
                 isPremium: true,
-                name: file.name
+                name: file.name,
+                animeId: animeMapping?.animeId,
+                animeTitle: animeMapping?.animeTitle
               });
             });
           }
@@ -118,15 +120,28 @@ export function AvatarSelector({
     }
   }, [isOpen, availableAvatars.length, toast]);
 
+  const { data: avatarsWithUnlocks } = useAvatarUnlocks(availableAvatars);
+
   const handleSelectAvatar = async (avatarOption: AvatarOption) => {
     if (!user) return;
 
-    // Check if user can access premium avatars
-    if (avatarOption.isPremium && !isPremium) {
-      toast({
-        variant: "destructive",
-        description: "Este avatar é exclusivo para usuários Premium!"
-      });
+    if (!avatarOption.isUnlocked) {
+      if (!isPremium) {
+        toast({
+          variant: "destructive",
+          description: "Este avatar é exclusivo para usuários Premium!"
+        });
+      } else if (avatarOption.animeTitle) {
+        toast({
+          variant: "destructive",
+          description: `Você precisa assistir ${avatarOption.animeTitle} para desbloquear este avatar!`
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          description: "Este avatar ainda não foi desbloqueado!"
+        });
+      }
       return;
     }
 
@@ -151,6 +166,8 @@ export function AvatarSelector({
       });
     }
   };
+
+  const avatarsToDisplay = avatarsWithUnlocks || availableAvatars;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -191,9 +208,9 @@ export function AvatarSelector({
                 <Skeleton key={i} className="h-20 w-20 rounded-full mx-auto" />
               ))}
             </div>
-          ) : availableAvatars.length > 0 ? (
+          ) : avatarsToDisplay.length > 0 ? (
             <div className="grid grid-cols-3 gap-4">
-              {availableAvatars.map((avatarOption, index) => (
+              {avatarsToDisplay.map((avatarOption, index) => (
                 <div key={index} className="flex flex-col items-center gap-2">
                   <div className="relative">
                     <button
@@ -202,17 +219,23 @@ export function AvatarSelector({
                           ? "border-anime-purple scale-110"
                           : "border-transparent hover:border-anime-purple/50"
                       } ${
-                        avatarOption.isPremium && !isPremium 
+                        !avatarOption.isUnlocked
                           ? "opacity-50 cursor-not-allowed" 
                           : "cursor-pointer"
                       }`}
                       onClick={() => handleSelectAvatar(avatarOption)}
-                      disabled={avatarOption.isPremium && !isPremium}
+                      disabled={!avatarOption.isUnlocked}
                     >
                       <Avatar className="h-20 w-20">
                         <AvatarImage src={avatarOption.url} alt={`Avatar ${index + 1}`} />
                         <AvatarFallback>{`A${index + 1}`}</AvatarFallback>
                       </Avatar>
+                      
+                      {!avatarOption.isUnlocked && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                          <Lock className="h-6 w-6 text-white" />
+                        </div>
+                      )}
                     </button>
                     
                     {avatarOption.isPremium && (
@@ -221,6 +244,12 @@ export function AvatarSelector({
                       </Badge>
                     )}
                   </div>
+                  
+                  {avatarOption.isPremium && avatarOption.animeTitle && !avatarOption.isUnlocked && (
+                    <p className="text-xs text-center text-muted-foreground">
+                      Assista {avatarOption.animeTitle}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -228,7 +257,7 @@ export function AvatarSelector({
             <p className="text-center text-muted-foreground">Nenhum avatar encontrado.</p>
           )}
           
-          {!isPremium && availableAvatars.some(avatar => avatar.isPremium) && (
+          {!isPremium && avatarsToDisplay.some(avatar => avatar.isPremium) && (
             <div className="text-center text-sm text-muted-foreground mt-4">
               <p>Avatares com <Crown className="inline h-4 w-4 text-yellow-500" /> são exclusivos para usuários Premium</p>
             </div>
