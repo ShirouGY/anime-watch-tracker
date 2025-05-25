@@ -43,24 +43,24 @@ const ListsPage = () => {
   };
   
   return (
-    <div className="space-y-4 sm:space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold">Minhas Listas</h1>
-        <div className="w-full sm:w-auto">
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <h1 className="text-2xl lg:text-3xl font-bold">Minhas Listas</h1>
+        <div className="w-full lg:w-auto">
           <AddAnimeDialog />
         </div>
       </div>
       
       <Tabs defaultValue="watchlist" className="w-full">
-        <TabsList className="mb-4 w-full sm:w-auto grid grid-cols-2 sm:grid-cols-3 h-auto">
-          <TabsTrigger value="watchlist" className="text-xs sm:text-sm px-2 sm:px-4">
+        <TabsList className="mb-4 w-full lg:w-auto grid grid-cols-2 lg:grid-cols-3 h-auto">
+          <TabsTrigger value="watchlist" className="text-sm px-4 py-2">
             Quero Assistir
           </TabsTrigger>
-          <TabsTrigger value="watched" className="text-xs sm:text-sm px-2 sm:px-4">
+          <TabsTrigger value="watched" className="text-sm px-4 py-2">
             Assistidos
           </TabsTrigger>
           {isPremium && (
-            <TabsTrigger value="recommended" className="text-xs sm:text-sm px-2 sm:px-4 col-span-2 sm:col-span-1">
+            <TabsTrigger value="recommended" className="text-sm px-4 py-2 col-span-2 lg:col-span-1">
               Recomendados
             </TabsTrigger>
           )}
@@ -88,7 +88,7 @@ const ListsPage = () => {
         {isPremium && (
           <TabsContent value="recommended">
             <div className="text-center py-10">
-               <p className="text-muted-foreground text-sm sm:text-base">Conteúdo de recomendações para usuários Premium.</p>
+               <p className="text-muted-foreground">Conteúdo de recomendações para usuários Premium.</p>
             </div>
           </TabsContent>
         )}

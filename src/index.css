@@ -76,18 +76,6 @@
   body {
     @apply bg-background text-foreground dark;
   }
-
-  /* Melhorias para mobile */
-  @media (max-width: 768px) {
-    body {
-      font-size: 14px;
-    }
-    
-    .container {
-      padding-left: 1rem;
-      padding-right: 1rem;
-    }
-  }
 }
 
 @layer components {
@@ -96,7 +84,7 @@
   }
   
   .anime-button {
-    @apply rounded-md px-3 py-2 sm:px-4 sm:py-2 transition-all duration-200 flex items-center gap-2 font-medium text-sm;
+    @apply rounded-md px-3 py-2 transition-all duration-200 flex items-center gap-2 font-medium text-sm;
   }
   
   .anime-button-primary {
@@ -110,21 +98,37 @@
   .anime-gradient-text {
     @apply text-transparent bg-clip-text bg-gradient-to-r from-anime-purple to-anime-pink;
   }
+}
 
-  /* Componentes responsivos */
-  .mobile-container {
-    @apply px-4 sm:px-6 lg:px-8;
+/* Animações */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
-
-  .mobile-text {
-    @apply text-sm sm:text-base;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
 
-  .mobile-heading {
-    @apply text-lg sm:text-xl lg:text-2xl;
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Melhorias para mobile */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
-
-  .mobile-grid {
-    @apply grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  
+  /* Melhor espaçamento em mobile */
+  .space-y-6 > * + * {
+    margin-top: 1.5rem;
+  }
+  
+  .space-y-4 > * + * {
+    margin-top: 1rem;
   }
 }
