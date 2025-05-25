@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Clock, Crown, Medal, Star, Trophy } from "lucide-react";
+import { BookOpen, Clock, Crown, Medal, Star, Trophy, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAnimeLists, Anime } from "@/hooks/use-anime-lists";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,6 +14,8 @@ import { AvatarSelector } from "@/components/profile/AvatarSelector";
 import { AchievementsSection } from "@/components/profile/AchievementsSection";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { AVATAR_ANIME_MAPPING } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 interface ProfileData {
   username: string | null;
@@ -28,6 +30,10 @@ const ProfilePage = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [showAchievementsDialog, setShowAchievementsDialog] = useState(false);
+  
+  // Novo estado para armazenar avatares premium com URLs públicas
+  const [premiumAvatarsWithUrls, setPremiumAvatarsWithUrls] = useState<Array<{ filename: string; url: string }>>([]);
+  const [loadingAvatars, setLoadingAvatars] = useState(true); // Estado de loading para os avatares
   
   const { data: watchedAnimes, isLoading: loadingWatched } = useAnimeLists('completed');
   const { data: watchingAnimes, isLoading: loadingWatching } = useAnimeLists('watching');
@@ -67,9 +73,38 @@ const ProfilePage = () => {
         }
       };
       
+      // Nova função para buscar avatares premium do Storage
+      const fetchPremiumAvatars = async () => {
+        setLoadingAvatars(true);
+        try {
+          const { data, error } = await supabase.storage
+            .from('avatar-icons') // Substitua 'avatar-icons' pelo nome do seu bucket, se for diferente
+            .list('icons_premium');
+
+          if (error) throw error;
+
+          const avatarsWithUrls = data.map((file) => {
+            const { data: { publicUrl } } = supabase.storage
+              .from('avatar-icons') // Substitua 'avatar-icons' pelo nome do seu bucket, se for diferente
+              .getPublicUrl(`icons_premium/${file.name}`);
+            return { filename: file.name, url: publicUrl };
+          });
+          setPremiumAvatarsWithUrls(avatarsWithUrls);
+        } catch (error) {
+          console.error('Error fetching premium avatars:', error);
+          toast({
+            variant: "destructive",
+            description: "Erro ao carregar avatares premium.",
+          });
+        } finally {
+          setLoadingAvatars(false);
+        }
+      };
+
       fetchUserProfile();
+      fetchPremiumAvatars(); // Chame a nova função de busca de avatares
     }
-  }, [user]);
+  }, [user, isPremium, watchedAnimes]);
   
   const isLoading = loadingWatched || loadingWatching || loadingPlanToWatch;
   
@@ -96,17 +131,68 @@ const ProfilePage = () => {
   
   const otakuLevel = getOtakuLevel();
   
-  const handleUpgradeToPremium = () => {
-    setIsPremium(true);
-    toast({
-      title: "Parabéns!",
-      description: "Você foi atualizado para o plano Premium.",
-    });
+  const handleUpgradeToPremium = async () => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        description: "Usuário não autenticado.",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_premium: true })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      // Se a atualização no DB for bem-sucedida:
+      setIsPremium(true); // Atualiza o estado local
+      toast({
+        title: "Parabéns!",
+        description: "Você foi atualizado para o plano Premium.",
+      });
+    } catch (error: any) {
+      console.error('Erro ao atualizar para premium:', error);
+      toast({
+        variant: "destructive",
+        description: `Erro ao atualizar para premium: ${error.message || 'Erro desconhecido'}`,
+      });
+    }
   };
 
   const handleAvatarChange = (url: string) => {
     setAvatar(url);
   };
+  
+  // Filtra avatares premium com animeId para as conquistas
+  const animeLinkedPremiumAvatars = useMemo(() => {
+    // Usamos o estado premiumAvatarsWithUrls que agora contém as URLs corretas
+    return premiumAvatarsWithUrls
+      .map(avatarFile => {
+        const mapping = AVATAR_ANIME_MAPPING[avatarFile.filename];
+        // Filtra apenas avatares que estão no mapeamento E têm um animeId associado
+        if (mapping && mapping.animeId) {
+          return {
+            filename: avatarFile.filename,
+            url: avatarFile.url, // Usa a URL obtida do Storage
+            animeId: mapping.animeId,
+            animeTitle: mapping.animeTitle,
+            // Lógica de desbloqueio: Premium E assistiu o anime
+            isUnlocked: isPremium && completedAnimeIdsSet.has(mapping.animeId),
+          };
+        }
+        return null; // Ignora avatares no Storage que não estão mapeados ou não têm animeId
+      })
+      .filter(avatar => avatar !== null); // Remove os itens nulos
+  }, [premiumAvatarsWithUrls, isPremium, completedAnimeIdsSet]); // Adiciona premiumAvatarsWithUrls às dependências
+
+  // Calcula o progresso
+  const totalAnimeLinkedAvatars = animeLinkedPremiumAvatars.length;
+  const unlockedAnimeLinkedAvatars = animeLinkedPremiumAvatars.filter(avatar => avatar.isUnlocked).length;
+  const avatarProgressPercentage = totalAnimeLinkedAvatars > 0 ? (unlockedAnimeLinkedAvatars / totalAnimeLinkedAvatars) * 100 : 0;
   
   if (isLoading) {
     return (
@@ -369,81 +455,55 @@ const ProfilePage = () => {
       <Dialog open={showAchievementsDialog} onOpenChange={setShowAchievementsDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Suas Conquistas</DialogTitle>
+            <DialogTitle>Conquistas de Avatar Premium</DialogTitle>
           </DialogHeader>
           <ScrollArea className="max-h-[400px] py-4">
-            <div className="grid gap-4 md:grid-cols-1">
-              <Card className="border border-anime-purple/50 shadow-md">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-full bg-anime-purple/20 text-anime-purple">
-                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+             {loadingAvatars ? (
+                <div className="flex items-center justify-center h-32">
+                   <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                   <p className="ml-2 text-muted-foreground">Carregando avatares...</p>
+                </div>
+             ) : (
+            <div className="px-4 space-y-6">
+              <div className="text-center space-y-2">
+                <h4 className="text-lg font-bold">Progresso dos Avatares Desbloqueáveis</h4>
+                <p className="text-sm text-muted-foreground">
+                  Assista animes associados e seja Premium para desbloquear estes avatares exclusivos!
+                </p>
+                <div className="flex items-center justify-center gap-2 mt-4">
+                  <span className="text-xl font-bold text-anime-purple">{unlockedAnimeLinkedAvatars}</span>
+                  <span className="text-muted-foreground">/</span>
+                  <span className="text-muted-foreground text-xl font-bold">{totalAnimeLinkedAvatars}</span>
+                </div>
+                <Progress value={avatarProgressPercentage} className="w-full mt-2" />
+              </div>
+
+              <div className="grid grid-cols-4 gap-4">
+                {animeLinkedPremiumAvatars.map((avatar, index) => (
+                  <div key={avatar.filename} className="flex flex-col items-center gap-1">
+                    <div className={cn("relative rounded-full overflow-hidden",
+                       avatar.isUnlocked ? "border-2 border-anime-purple" : "border-2 border-transparent opacity-50"
+                    )}>
+                       {/* TODO: Otimizar URL ou usar hook de avatar do storage se necessário */}
+                      <Avatar className="h-16 w-16">
+                        <AvatarImage src={avatar.url} alt={avatar.animeTitle} />
+                        <AvatarFallback>{avatar.animeTitle?.substring(0,2) || '??'}</AvatarFallback>
+                      </Avatar>
+                      {!avatar.isUnlocked && (
+                         <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-full">
+                           <Lock className="h-6 w-6 text-white" />
+                         </div>
+                      )}
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium">Sistema de Conquistas</h4>
-                      <p className="text-xs text-muted-foreground">Desbloqueie medalhas conforme sua jornada no mundo dos animes</p>
-                    </div>
+                    <p className="text-xs text-center text-muted-foreground line-clamp-2">{avatar.animeTitle}</p>
                   </div>
-                </CardContent>
-              </Card>
-              <Card className="border border-anime-purple/50 shadow-md">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-full bg-anime-purple/20 text-anime-purple">
-                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20 9H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M20 12H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M20 15H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M10 6H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M10 18H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <rect x="14" y="3" width="6" height="6" rx="1" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <rect x="14" y="15" width="6" height="6" rx="1" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium">Sistema de Conquistas</h4>
-                      <p className="text-xs text-muted-foreground">Desbloqueie medalhas conforme sua jornada no mundo dos animes</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border border-anime-purple/50 shadow-md">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-full bg-anime-purple/20 text-anime-purple">
-                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19 21L12 16L5 21V5C5 4.46957 5.21071 3.96086 5.58579 3.58579C5.96086 3.21071 6.46957 3 7 3H17C17.5304 3 18.0391 3.21071 18.4142 3.58579C18.7893 3.96086 19 4.46957 19 5V21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium">Sistema de Conquistas</h4>
-                      <p className="text-xs text-muted-foreground">Desbloqueie medalhas conforme sua jornada no mundo dos animes</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border border-anime-purple/50 shadow-md">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-full bg-anime-purple/20 text-anime-purple">
-                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5C21 3.89543 20.1046 3 19 3Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M9 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M15 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium">Sistema de Conquistas</h4>
-                      <p className="text-xs text-muted-foreground">Desbloqueie medalhas conforme sua jornada no mundo dos animes</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                ))}
+                 {totalAnimeLinkedAvatars === 0 && (
+                    <p className="text-center text-muted-foreground col-span-4">Nenhum avatar premium vinculado a anime encontrado.</p>
+                 )}
+              </div>
             </div>
+            )}
           </ScrollArea>
         </DialogContent>
       </Dialog>

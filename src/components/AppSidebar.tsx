@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -14,11 +13,9 @@ import {
   SidebarMenuButton
 } from "@/components/ui/sidebar";
 import { 
-  BookOpen, 
   Home, 
   List, 
   LogOut, 
-  Plus, 
   Settings, 
   Star, 
   User 

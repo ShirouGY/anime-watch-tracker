@@ -1,0 +1,16 @@
+export const AVATAR_ANIME_MAPPING: Record<string, { animeId: string; animeTitle: string }> = {
+  'dragon_ball_z.jpeg': { animeId: '223', animeTitle: 'Dragon Ball Z' },
+  'jujutsu_kaisen.jpeg': { animeId: '40748', animeTitle: 'Jujutsu Kaisen' },
+  'naruto.png': { animeId: '20', animeTitle: 'Naruto' },
+  'sasuke.png': { animeId: '20', animeTitle: 'Naruto' },
+  'goku.png': { animeId: '223', animeTitle: 'Dragon Ball Z' },
+  'vegeta.png': { animeId: '223', animeTitle: 'Dragon Ball Z' },
+  'luffy.png': { animeId: '21', animeTitle: 'One Piece' },
+  'zoro.png': { animeId: '21', animeTitle: 'One Piece' },
+  'ichigo.png': { animeId: '269', animeTitle: 'Bleach' },
+  'rukia.png': { animeId: '269', animeTitle: 'Bleach' },
+  'natsu.png': { animeId: '6702', animeTitle: 'Fairy Tail' },
+  'erza.png': { animeId: '6702', animeTitle: 'Fairy Tail' },
+  'edward.png': { animeId: '121', animeTitle: 'Fullmetal Alchemist' },
+  'alphonse.png': { animeId: '121', animeTitle: 'Fullmetal Alchemist' },
+}; 

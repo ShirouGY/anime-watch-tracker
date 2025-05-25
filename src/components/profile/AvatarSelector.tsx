@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Dialog, 
@@ -16,23 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Crown, Lock } from "lucide-react";
 import { AvatarOption, AvatarFile } from "@/types/avatar";
-import { useAvatarUnlocks } from "@/hooks/use-avatar-unlocks";
-
-// Mapeamento expandido de arquivos de avatar para IDs de anime
-const AVATAR_ANIME_MAPPING: Record<string, { animeId: string; animeTitle: string }> = {
-  'naruto.png': { animeId: '20', animeTitle: 'Naruto' },
-  'sasuke.png': { animeId: '20', animeTitle: 'Naruto' },
-  'goku.png': { animeId: '223', animeTitle: 'Dragon Ball Z' },
-  'vegeta.png': { animeId: '223', animeTitle: 'Dragon Ball Z' },
-  'luffy.png': { animeId: '21', animeTitle: 'One Piece' },
-  'zoro.png': { animeId: '21', animeTitle: 'One Piece' },
-  'ichigo.png': { animeId: '269', animeTitle: 'Bleach' },
-  'rukia.png': { animeId: '269', animeTitle: 'Bleach' },
-  'natsu.png': { animeId: '6702', animeTitle: 'Fairy Tail' },
-  'erza.png': { animeId: '6702', animeTitle: 'Fairy Tail' },
-  'edward.png': { animeId: '121', animeTitle: 'Fullmetal Alchemist' },
-  'alphonse.png': { animeId: '121', animeTitle: 'Fullmetal Alchemist' },
-};
+import { AVATAR_ANIME_MAPPING } from "@/lib/constants";
 
 export function AvatarSelector({
   currentAvatar,
@@ -77,21 +60,6 @@ export function AvatarSelector({
 
           const allAvatars: AvatarOption[] = [];
 
-          // Process free icons
-          if (freeIcons) {
-            freeIcons.forEach((file: AvatarFile) => {
-              const { data: { publicUrl } } = supabase.storage
-                .from('avatar-icons')
-                .getPublicUrl(`icons_free/${file.name}`);
-              
-              allAvatars.push({
-                url: publicUrl,
-                isPremium: false,
-                name: file.name
-              });
-            });
-          }
-
           // Process premium icons
           if (premiumIcons) {
             premiumIcons.forEach((file: AvatarFile) => {
@@ -101,12 +69,31 @@ export function AvatarSelector({
               
               const animeMapping = AVATAR_ANIME_MAPPING[file.name];
               
-              allAvatars.push({
+              const avatarOption: AvatarOption = {
                 url: publicUrl,
                 isPremium: true,
                 name: file.name,
                 animeId: animeMapping?.animeId,
-                animeTitle: animeMapping?.animeTitle
+                animeTitle: animeMapping?.animeTitle,
+                isUnlocked: isPremium && (animeMapping?.animeId ? completedAnimeIds.has(animeMapping.animeId) : true)
+              };
+
+              allAvatars.push(avatarOption);
+            });
+          }
+
+          // Process free icons (garante que isUnlocked seja true)
+          if (freeIcons) {
+            freeIcons.forEach((file: AvatarFile) => {
+              const { data: { publicUrl } } = supabase.storage
+                .from('avatar-icons')
+                .getPublicUrl(`icons_free/${file.name}`);
+
+              allAvatars.push({
+                url: publicUrl,
+                isPremium: false,
+                name: file.name,
+                isUnlocked: true, // Avatares gratuitos SEMPRE desbloqueados
               });
             });
           }
@@ -127,29 +114,29 @@ export function AvatarSelector({
     }
   }, [isOpen, availableAvatars.length, toast]);
 
-  const { data: avatarsWithUnlocks } = useAvatarUnlocks(availableAvatars);
-
   const handleSelectAvatar = async (avatarOption: AvatarOption) => {
     if (!user) return;
 
-    if (!avatarOption.isUnlocked) {
+    // Nova lógica de verificação direta
+    let canSelect = true;
+    let reason = "";
+
+    if (avatarOption.isPremium) {
       if (!isPremium) {
-        toast({
-          variant: "destructive",
-          description: "Este avatar é exclusivo para usuários Premium!"
-        });
-      } else if (avatarOption.animeTitle) {
-        toast({
-          variant: "destructive",
-          description: `Você precisa assistir ${avatarOption.animeTitle} para desbloquear este avatar!`
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          description: "Este avatar ainda não foi desbloqueado!"
-        });
+        canSelect = false;
+        reason = "Este avatar é exclusivo para usuários Premium!";
+      } else if (avatarOption.animeId && !completedAnimeIds.has(avatarOption.animeId)) {
+        canSelect = false;
+        reason = `Você precisa assistir ${avatarOption.animeTitle || 'o anime relacionado'} para usar este avatar!`;
       }
-      return;
+    }
+
+    if (!canSelect) {
+      toast({
+        variant: "destructive",
+        description: reason || "Este avatar ainda não foi desbloqueado!"
+      });
+      return; // Impede a seleção
     }
 
     try {
@@ -174,7 +161,7 @@ export function AvatarSelector({
     }
   };
 
-  const avatarsToDisplay = avatarsWithUnlocks || availableAvatars;
+  const avatarsToDisplay = availableAvatars;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

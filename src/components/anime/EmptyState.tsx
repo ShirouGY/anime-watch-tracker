@@ -1,5 +1,4 @@
 
-import { ReactNode } from "react";
 import { AddAnimeDialog } from "@/components/AddAnimeDialog";
 import { LucideIcon } from "lucide-react";
 
