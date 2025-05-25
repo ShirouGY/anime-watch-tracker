@@ -111,7 +111,8 @@ const ProfilePage = () => {
                 </Avatar>
                 <AvatarSelector 
                   currentAvatar={avatar} 
-                  onAvatarChange={handleAvatarChange} 
+                  onAvatarChange={handleAvatarChange}
+                  isPremium={isPremium}
                 />
               </div>
               <h2 className="mt-4 text-xl font-bold">{username || "Otaku User"}</h2>
