@@ -167,7 +167,7 @@ const RecommendationsPage = () => {
       )
     : recommendations;
 
-  const availableGenres = genres.filter(genre => genre.name !== "Trending");
+  const availableGenres = genres;
 
   const filteredTrendingAnimes = selectedGenre 
     ? trendingAnimes.filter(anime => 
@@ -191,6 +191,31 @@ const RecommendationsPage = () => {
           Premium Ativo
         </Badge>
       </div>
+
+      {/* Info sobre como funciona a recomendação */}
+      <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+        <CardHeader>
+          <CardTitle className="text-lg text-blue-800 dark:text-blue-200 flex items-center gap-2">
+            <Star className="h-5 w-5" />
+            Como funcionam as recomendações personalizadas
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-sm text-blue-700 dark:text-blue-300">
+          <div className="space-y-2">
+            <p>• <strong>Análise de gêneros:</strong> O sistema identifica os gêneros dos animes que você mais assiste</p>
+            <p>• <strong>Padrões de avaliação:</strong> Considera suas notas e animes favoritos</p>
+            <p>• <strong>Match inteligente:</strong> Busca animes similares com alta pontuação na base de dados</p>
+            <p>• <strong>Filtros automáticos:</strong> Remove animes que você já assistiu ou tem na sua lista</p>
+          </div>
+          {watchedAnimes && watchedAnimes.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
+              <p className="font-medium">
+                Baseado em {watchedAnimes.length} animes assistidos e {watchingAnimes?.length || 0} animes assistindo
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Genre Filter */}
       {availableGenres.length > 0 && (
