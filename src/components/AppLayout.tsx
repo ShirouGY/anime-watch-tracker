@@ -25,7 +25,7 @@ export function AppLayout() {
                 isMobile ? "justify-between" : "justify-end"
               )}>
                 {isMobile && (
-                  <SidebarTrigger asChild>
+                  <SidebarTrigger>
                     <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0">
                       <Menu className="h-5 w-5" />
                     </Button>
