@@ -1,3 +1,4 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AddAnimeDialog } from "@/components/AddAnimeDialog";
@@ -42,18 +43,26 @@ const ListsPage = () => {
   };
   
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Minhas Listas</h1>
-        <AddAnimeDialog />
+    <div className="space-y-4 sm:space-y-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold">Minhas Listas</h1>
+        <div className="w-full sm:w-auto">
+          <AddAnimeDialog />
+        </div>
       </div>
       
       <Tabs defaultValue="watchlist" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="watchlist">Quero Assistir</TabsTrigger>
-          <TabsTrigger value="watched">Assistidos</TabsTrigger>
+        <TabsList className="mb-4 w-full sm:w-auto grid grid-cols-2 sm:grid-cols-3 h-auto">
+          <TabsTrigger value="watchlist" className="text-xs sm:text-sm px-2 sm:px-4">
+            Quero Assistir
+          </TabsTrigger>
+          <TabsTrigger value="watched" className="text-xs sm:text-sm px-2 sm:px-4">
+            Assistidos
+          </TabsTrigger>
           {isPremium && (
-            <TabsTrigger value="recommended">Recomendados</TabsTrigger>
+            <TabsTrigger value="recommended" className="text-xs sm:text-sm px-2 sm:px-4 col-span-2 sm:col-span-1">
+              Recomendados
+            </TabsTrigger>
           )}
         </TabsList>
         
@@ -79,7 +88,7 @@ const ListsPage = () => {
         {isPremium && (
           <TabsContent value="recommended">
             <div className="text-center py-10">
-               <p className="text-muted-foreground">Conteúdo de recomendações para usuários Premium.</p>
+               <p className="text-muted-foreground text-sm sm:text-base">Conteúdo de recomendações para usuários Premium.</p>
             </div>
           </TabsContent>
         )}

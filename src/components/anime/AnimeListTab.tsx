@@ -1,3 +1,4 @@
+
 import { Anime } from "@/hooks/use-anime-lists";
 import { AnimeCard } from "./AnimeCard";
 import { EmptyState } from "./EmptyState";
@@ -22,9 +23,9 @@ export function AnimeListTab({
 }: AnimeListTabProps) {
   if (isLoading) {
     return (
-      <div className="text-center py-12">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <p className="mt-2 text-muted-foreground">Carregando sua lista...</p>
+      <div className="text-center py-8 sm:py-12">
+        <div className="inline-block animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-primary"></div>
+        <p className="mt-2 text-muted-foreground text-sm sm:text-base">Carregando sua lista...</p>
       </div>
     );
   }
@@ -44,7 +45,7 @@ export function AnimeListTab({
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
       {animes.map((anime) => (
         <AnimeCard
           key={anime.id}

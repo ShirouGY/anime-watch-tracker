@@ -42,23 +42,23 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-anime-navy to-black">
-      <Card className="w-full max-w-md border-anime-purple/20">
-        <CardHeader className="space-y-2 text-center">
+    <div className="flex min-h-screen items-center justify-center p-2 sm:p-4 bg-gradient-to-br from-anime-navy to-black">
+      <Card className="w-full max-w-sm sm:max-w-md border-anime-purple/20">
+        <CardHeader className="space-y-2 text-center px-4 sm:px-6">
           <div className="flex justify-center mb-2">
-            <BookOpen className="h-12 w-12 text-anime-purple" />
+            <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 text-anime-purple" />
           </div>
-          <CardTitle className="text-2xl font-bold anime-gradient-text">
+          <CardTitle className="text-xl sm:text-2xl font-bold anime-gradient-text">
             SoloAnimeList
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm sm:text-base">
             Crie sua conta para gerenciar suas listas de animes
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleRegister}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 px-4 sm:px-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -66,10 +66,11 @@ const RegisterPage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="h-10 sm:h-11"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password" className="text-sm">Senha</Label>
               <Input
                 id="password"
                 type="password"
@@ -77,10 +78,11 @@ const RegisterPage = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="h-10 sm:h-11"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+              <Label htmlFor="confirmPassword" className="text-sm">Confirmar Senha</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -88,22 +90,23 @@ const RegisterPage = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                className="h-10 sm:h-11"
               />
               {passwordError && (
-                <p className="text-sm text-red-500">{passwordError}</p>
+                <p className="text-xs sm:text-sm text-red-500">{passwordError}</p>
               )}
             </div>
             <Button 
               type="submit" 
-              className="w-full bg-anime-purple hover:bg-anime-purple/90"
+              className="w-full bg-anime-purple hover:bg-anime-purple/90 h-10 sm:h-11 text-sm sm:text-base"
               disabled={isLoading}
             >
               {isLoading ? "Registrando..." : "Criar Conta"}
             </Button>
           </CardContent>
         </form>
-        <CardFooter className="flex justify-center">
-          <div className="text-sm text-muted-foreground">
+        <CardFooter className="flex justify-center px-4 sm:px-6">
+          <div className="text-xs sm:text-sm text-muted-foreground text-center">
             Já tem uma conta?{" "}
             <Link to="/login" className="text-primary hover:underline">
               Entrar

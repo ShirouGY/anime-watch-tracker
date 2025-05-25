@@ -16,12 +16,12 @@ export function AppLayout() {
         <div className="flex w-full min-h-screen">
           <AppSidebar />
           <main className="flex-1 overflow-auto">
-            <div className="container mx-auto p-4 pb-16">
-              <div className={cn("flex items-center mb-6", isMobile ? "justify-between" : "justify-end")}>
+            <div className="container mx-auto p-2 sm:p-4 pb-16 max-w-7xl">
+              <div className={cn("flex items-center mb-4 sm:mb-6", isMobile ? "justify-between" : "justify-end")}>
                 {isMobile && (
                   <SidebarTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Menu />
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Menu className="h-4 w-4" />
                     </Button>
                   </SidebarTrigger>
                 )}
