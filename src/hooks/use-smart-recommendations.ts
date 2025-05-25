@@ -20,21 +20,8 @@ interface RecommendationAnime {
 
 const JIKAN_API_BASE = 'https://api.jikan.moe/v4';
 
-// Mapeia gêneros em português para inglês para a API
-const genreMap: Record<string, string> = {
-  'Ação': 'Action',
-  'Romance': 'Romance', 
-  'Comédia': 'Comedy',
-  'Fantasia': 'Fantasy',
-  'Drama': 'Drama',
-  'Sci-Fi': 'Sci-Fi',
-  'Terror': 'Horror',
-  'Thriller': 'Thriller',
-  'Slice of Life': 'Slice of Life',
-  'Aventura': 'Adventure'
-};
-
 async function fetchRecommendationsByGenre(genres: string[]): Promise<RecommendationAnime[]> {
+  console.log('Buscando recomendações para gêneros:', genres);
   const recommendations: RecommendationAnime[] = [];
   
   // Para cada gênero, busca animes populares
@@ -60,6 +47,7 @@ async function fetchRecommendationsByGenre(genres: string[]): Promise<Recommenda
           matchPercentage: Math.floor(Math.random() * 30) + 70 // Simula % de match
         })) || [];
         
+        console.log(`Encontrados ${animes.length} animes para gênero ${genre}`);
         recommendations.push(...animes);
       }
     } catch (error) {
@@ -76,15 +64,17 @@ async function fetchRecommendationsByGenre(genres: string[]): Promise<Recommenda
     return acc;
   }, [] as RecommendationAnime[]);
   
+  console.log('Recomendações únicas encontradas:', uniqueRecommendations.length);
   return uniqueRecommendations.slice(0, 20);
 }
 
 async function fetchTrendingAnimes(): Promise<RecommendationAnime[]> {
   try {
+    console.log('Buscando animes em alta...');
     const response = await fetch(`${JIKAN_API_BASE}/top/anime?limit=20`);
     if (response.ok) {
       const data = await response.json();
-      return data.data?.map((anime: any) => ({
+      const trending = data.data?.map((anime: any) => ({
         mal_id: anime.mal_id,
         title: anime.title,
         images: anime.images,
@@ -95,6 +85,9 @@ async function fetchTrendingAnimes(): Promise<RecommendationAnime[]> {
         synopsis: anime.synopsis || '',
         matchPercentage: Math.floor(Math.random() * 20) + 80
       })) || [];
+      
+      console.log('Animes em alta encontrados:', trending.length);
+      return trending;
     }
   } catch (error) {
     console.error('Erro ao buscar animes em alta:', error);
@@ -102,7 +95,41 @@ async function fetchTrendingAnimes(): Promise<RecommendationAnime[]> {
   return [];
 }
 
+async function fetchPopularAnimes(): Promise<RecommendationAnime[]> {
+  try {
+    console.log('Buscando animes populares como fallback...');
+    const response = await fetch(`${JIKAN_API_BASE}/anime?order_by=popularity&limit=15&min_score=6`);
+    if (response.ok) {
+      const data = await response.json();
+      const popular = data.data?.map((anime: any) => ({
+        mal_id: anime.mal_id,
+        title: anime.title,
+        images: anime.images,
+        score: anime.score || 0,
+        episodes: anime.episodes || 0,
+        year: anime.year,
+        genres: anime.genres || [],
+        synopsis: anime.synopsis || '',
+        matchPercentage: Math.floor(Math.random() * 20) + 60
+      })) || [];
+      
+      console.log('Animes populares encontrados:', popular.length);
+      return popular;
+    }
+  } catch (error) {
+    console.error('Erro ao buscar animes populares:', error);
+  }
+  return [];
+}
+
 function extractUserGenres(userAnimes: any[]): string[] {
+  console.log('Analisando gêneros dos animes do usuário:', userAnimes.length);
+  
+  if (!userAnimes || userAnimes.length === 0) {
+    console.log('Usuário não tem animes, retornando gêneros padrão');
+    return ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy'];
+  }
+
   const genreCount: Record<string, number> = {};
   
   // Conta os gêneros dos animes que o usuário assistiu/está assistindo
@@ -115,10 +142,19 @@ function extractUserGenres(userAnimes: any[]): string[] {
   });
   
   // Retorna os gêneros mais populares do usuário
-  return Object.entries(genreCount)
+  const topGenres = Object.entries(genreCount)
     .sort(([,a], [,b]) => b - a)
     .slice(0, 5)
     .map(([genre]) => genre);
+    
+  console.log('Gêneros identificados do usuário:', topGenres);
+  
+  // Se não encontrou gêneros suficientes, adiciona alguns padrão
+  if (topGenres.length < 3) {
+    topGenres.push('Action', 'Adventure', 'Comedy');
+  }
+  
+  return topGenres;
 }
 
 function getSimulatedGenres(title: string): string[] {
@@ -126,15 +162,31 @@ function getSimulatedGenres(title: string): string[] {
   const lowerTitle = title.toLowerCase();
   const genres: string[] = [];
   
-  if (lowerTitle.includes('love') || lowerTitle.includes('heart')) genres.push('Romance');
-  if (lowerTitle.includes('dragon') || lowerTitle.includes('battle') || lowerTitle.includes('fight')) genres.push('Action');
-  if (lowerTitle.includes('school') || lowerTitle.includes('high')) genres.push('Slice of Life');
-  if (lowerTitle.includes('magic') || lowerTitle.includes('fantasy')) genres.push('Fantasy');
-  if (lowerTitle.includes('funny') || lowerTitle.includes('comedy')) genres.push('Comedy');
+  if (lowerTitle.includes('love') || lowerTitle.includes('heart') || lowerTitle.includes('romance')) genres.push('Romance');
+  if (lowerTitle.includes('dragon') || lowerTitle.includes('battle') || lowerTitle.includes('fight') || lowerTitle.includes('war')) genres.push('Action');
+  if (lowerTitle.includes('school') || lowerTitle.includes('high') || lowerTitle.includes('student')) genres.push('School');
+  if (lowerTitle.includes('magic') || lowerTitle.includes('fantasy') || lowerTitle.includes('demon') || lowerTitle.includes('witch')) genres.push('Fantasy');
+  if (lowerTitle.includes('funny') || lowerTitle.includes('comedy') || lowerTitle.includes('gag')) genres.push('Comedy');
+  if (lowerTitle.includes('slice') || lowerTitle.includes('life') || lowerTitle.includes('daily')) genres.push('Slice of Life');
+  if (lowerTitle.includes('adventure') || lowerTitle.includes('journey') || lowerTitle.includes('quest')) genres.push('Adventure');
+  if (lowerTitle.includes('mystery') || lowerTitle.includes('detective') || lowerTitle.includes('crime')) genres.push('Mystery');
+  if (lowerTitle.includes('sport') || lowerTitle.includes('game') || lowerTitle.includes('team')) genres.push('Sports');
+  if (lowerTitle.includes('mecha') || lowerTitle.includes('robot') || lowerTitle.includes('gundam')) genres.push('Mecha');
   
-  // Se não encontrou nenhum gênero específico, adiciona alguns padrão
+  // Se não encontrou nenhum gênero específico, adiciona alguns padrão baseado em padrões comuns
   if (genres.length === 0) {
-    genres.push('Action', 'Adventure');
+    // Verifica se parece com anime shounen típico
+    if (lowerTitle.includes('hero') || lowerTitle.includes('power') || lowerTitle.includes('strong')) {
+      genres.push('Action', 'Adventure');
+    }
+    // Verifica se parece com anime escolar
+    else if (lowerTitle.includes('academy') || lowerTitle.includes('class') || lowerTitle.includes('student')) {
+      genres.push('School', 'Comedy');
+    }
+    // Padrão geral
+    else {
+      genres.push('Drama', 'Comedy');
+    }
   }
   
   return genres;
@@ -146,7 +198,10 @@ export function useSmartRecommendations(isPremium: boolean) {
   const query = useQuery({
     queryKey: ['smart-recommendations', userAnimes?.length, isPremium],
     queryFn: async () => {
+      console.log('Iniciando busca de recomendações...', { isPremium, userAnimesCount: userAnimes?.length });
+      
       if (!isPremium) {
+        console.log('Usuário não é premium, retornando dados vazios');
         return {
           recommendations: [],
           trendingAnimes: [],
@@ -158,28 +213,42 @@ export function useSmartRecommendations(isPremium: boolean) {
       const trendingAnimes = await fetchTrendingAnimes();
       let genres: string[] = [];
 
-      if (!userAnimes || userAnimes.length === 0) {
-        // Se usuário não tem animes, retorna recomendações populares gerais
-        const response = await fetch(`${JIKAN_API_BASE}/anime?order_by=popularity&limit=15`);
-        if (response.ok) {
-          const data = await response.json();
-          recommendations = data.data?.map((anime: any) => ({
-            mal_id: anime.mal_id,
-            title: anime.title,
-            images: anime.images,
-            score: anime.score || 0,
-            episodes: anime.episodes || 0,
-            year: anime.year,
-            genres: anime.genres || [],
-            synopsis: anime.synopsis || '',
-            matchPercentage: Math.floor(Math.random() * 20) + 60
-          })) || [];
-        }
-      } else {
-        const userGenres = extractUserGenres(userAnimes);
+      try {
+        const userGenres = extractUserGenres(userAnimes || []);
         genres = userGenres;
-        const mappedGenres = userGenres.map(genre => genreMap[genre] || genre);
-        recommendations = await fetchRecommendationsByGenre(mappedGenres);
+        
+        // Tenta buscar por gêneros do usuário
+        recommendations = await fetchRecommendationsByGenre(userGenres);
+        
+        // Se não conseguiu recomendações suficientes, busca animes populares
+        if (recommendations.length < 5) {
+          console.log('Poucas recomendações encontradas, buscando animes populares...');
+          const popularAnimes = await fetchPopularAnimes();
+          recommendations = [...recommendations, ...popularAnimes];
+          
+          // Remove duplicatas
+          recommendations = recommendations.reduce((acc, current) => {
+            const exists = acc.find(item => item.mal_id === current.mal_id);
+            if (!exists) {
+              acc.push(current);
+            }
+            return acc;
+          }, [] as RecommendationAnime[]);
+        }
+        
+        // Remove animes que o usuário já tem na lista
+        if (userAnimes && userAnimes.length > 0) {
+          const userAnimeIds = userAnimes.map(anime => anime.anime_id);
+          recommendations = recommendations.filter(rec => 
+            !userAnimeIds.includes(rec.mal_id.toString())
+          );
+          console.log('Após filtrar animes já assistidos:', recommendations.length);
+        }
+        
+      } catch (error) {
+        console.error('Erro ao buscar recomendações:', error);
+        // Em caso de erro, busca animes populares como fallback
+        recommendations = await fetchPopularAnimes();
       }
 
       // Extrai todos os gêneros únicos das recomendações
@@ -195,8 +264,14 @@ export function useSmartRecommendations(isPremium: boolean) {
         });
       });
 
+      console.log('Resultado final:', {
+        recommendations: recommendations.length,
+        trending: trendingAnimes.length,
+        genres: Array.from(allGenres).length
+      });
+
       return {
-        recommendations,
+        recommendations: recommendations.slice(0, 20),
         trendingAnimes,
         genres: Array.from(allGenres)
       };

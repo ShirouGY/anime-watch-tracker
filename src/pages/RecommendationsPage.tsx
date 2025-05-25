@@ -22,6 +22,7 @@ const RecommendationsPage = () => {
   
   const { data: watchedAnimes } = useAnimeLists('completed');
   const { data: watchingAnimes } = useAnimeLists('watching');
+  const { data: allUserAnimes } = useAnimeLists(); // Todos os animes do usuário
   
   const {
     recommendations,
@@ -30,6 +31,18 @@ const RecommendationsPage = () => {
     error,
     genres
   } = useSmartRecommendations(isPremium);
+
+  // Log para debug
+  useEffect(() => {
+    console.log('Estado atual da página:', {
+      isPremium,
+      recommendations: recommendations.length,
+      trendingAnimes: trendingAnimes.length,
+      userAnimes: allUserAnimes?.length || 0,
+      isLoading,
+      error
+    });
+  }, [isPremium, recommendations, trendingAnimes, allUserAnimes, isLoading, error]);
 
   // Força verificação da assinatura quando a página carrega
   useEffect(() => {
@@ -143,6 +156,39 @@ const RecommendationsPage = () => {
     );
   }
 
+  // Função para filtrar animes por gênero (corrigida)
+  const filterAnimesByGenre = (animes: any[], genre: string) => {
+    if (!genre) return animes;
+    
+    return animes.filter(anime => 
+      anime.genres && anime.genres.some((g: any) => 
+        g.name && g.name.toLowerCase().includes(genre.toLowerCase())
+      )
+    );
+  };
+
+  const filteredRecommendations = filterAnimesByGenre(recommendations, selectedGenre);
+  const filteredTrendingAnimes = filterAnimesByGenre(trendingAnimes, selectedGenre);
+
+  // Função para obter gêneros únicos e limitar a quantidade
+  const getUniqueGenres = () => {
+    const allGenres = new Set<string>();
+    
+    [...recommendations, ...trendingAnimes].forEach(anime => {
+      if (anime.genres) {
+        anime.genres.forEach((genre: any) => {
+          if (genre.name) {
+            allGenres.add(genre.name);
+          }
+        });
+      }
+    });
+    
+    return Array.from(allGenres).slice(0, 12); // Limita a 12 gêneros
+  };
+
+  const availableGenres = getUniqueGenres();
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -160,20 +206,6 @@ const RecommendationsPage = () => {
       </div>
     );
   }
-
-  const filteredRecommendations = selectedGenre 
-    ? recommendations.filter(anime => 
-        anime.genres.some(genre => genre.name.toLowerCase() === selectedGenre.toLowerCase())
-      )
-    : recommendations;
-
-  const availableGenres = genres;
-
-  const filteredTrendingAnimes = selectedGenre 
-    ? trendingAnimes.filter(anime => 
-        anime.genres.some(genre => genre.name.toLowerCase() === selectedGenre.toLowerCase())
-      )
-    : trendingAnimes;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -207,10 +239,17 @@ const RecommendationsPage = () => {
             <p>• <strong>Match inteligente:</strong> Busca animes similares com alta pontuação na base de dados</p>
             <p>• <strong>Filtros automáticos:</strong> Remove animes que você já assistiu ou tem na sua lista</p>
           </div>
-          {watchedAnimes && watchedAnimes.length > 0 && (
+          {allUserAnimes && allUserAnimes.length > 0 && (
             <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
               <p className="font-medium">
-                Baseado em {watchedAnimes.length} animes assistidos e {watchingAnimes?.length || 0} animes assistindo
+                Baseado em {allUserAnimes.length} animes na sua lista ({watchedAnimes?.length || 0} assistidos, {watchingAnimes?.length || 0} assistindo)
+              </p>
+            </div>
+          )}
+          {(!allUserAnimes || allUserAnimes.length === 0) && (
+            <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
+              <p className="font-medium text-amber-600 dark:text-amber-400">
+                💡 Adicione alguns animes à sua lista para receber recomendações mais personalizadas!
               </p>
             </div>
           )}
@@ -264,7 +303,10 @@ const RecommendationsPage = () => {
             <CardHeader>
               <CardTitle>Recomendações Personalizadas</CardTitle>
               <CardDescription>
-                Baseado em {watchedAnimes?.length || 0} animes assistidos e {watchingAnimes?.length || 0} animes assistindo
+                {allUserAnimes && allUserAnimes.length > 0 
+                  ? `Baseado em ${allUserAnimes.length} animes na sua lista (${watchedAnimes?.length || 0} assistidos, ${watchingAnimes?.length || 0} assistindo)`
+                  : 'Adicione animes à sua lista para receber recomendações personalizadas'
+                }
                 {selectedGenre && ` • Filtrado por: ${selectedGenre}`}
               </CardDescription>
             </CardHeader>
@@ -281,15 +323,31 @@ const RecommendationsPage = () => {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground mb-4">
-                    {selectedGenre 
-                      ? `Nenhuma recomendação encontrada para o gênero "${selectedGenre}"`
-                      : "Nenhuma recomendação encontrada. Assista mais animes para receber sugestões personalizadas!"
-                    }
-                  </p>
+                  <div className="mb-4">
+                    <Star className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-muted-foreground mb-2">
+                      {selectedGenre 
+                        ? `Nenhuma recomendação encontrada para o gênero "${selectedGenre}"`
+                        : (!allUserAnimes || allUserAnimes.length === 0)
+                          ? "Comece adicionando alguns animes à sua lista!"
+                          : "Carregando suas recomendações personalizadas..."
+                      }
+                    </p>
+                    {!allUserAnimes || allUserAnimes.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">
+                        Vá para a página "Listas" e adicione animes que você já assistiu ou quer assistir. 
+                        Isso nos ajudará a entender seus gostos e sugerir animes perfeitos para você!
+                      </p>
+                    ) : null}
+                  </div>
                   {selectedGenre && (
                     <Button variant="outline" onClick={() => setSelectedGenre("")}>
                       Limpar Filtro
+                    </Button>
+                  )}
+                  {(!allUserAnimes || allUserAnimes.length === 0) && (
+                    <Button onClick={() => window.location.href = '/listas'} className="ml-2">
+                      Ir para Listas
                     </Button>
                   )}
                 </div>
