@@ -12,6 +12,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AvatarSelector } from "@/components/profile/AvatarSelector";
 import { AchievementsSection } from "@/components/profile/AchievementsSection";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const ProfilePage = () => {
   const [isPremium, setIsPremium] = useState(false);
@@ -19,6 +21,7 @@ const ProfilePage = () => {
   const [username, setUsername] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+  const [showAchievementsDialog, setShowAchievementsDialog] = useState(false);
   
   const { data: watchedAnimes, isLoading: loadingWatched } = useAnimeLists('completed');
   const { data: watchingAnimes, isLoading: loadingWatching } = useAnimeLists('watching');
@@ -152,7 +155,11 @@ const ProfilePage = () => {
                     Gerenciar Assinatura
                   </Button>
                 )}
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => setShowAchievementsDialog(true)}
+                >
                   <Trophy size={16} className="mr-2" />
                   Conquistas
                 </Button>
@@ -346,6 +353,88 @@ const ProfilePage = () => {
           </Tabs>
         </div>
       </div>
+      <Dialog open={showAchievementsDialog} onOpenChange={setShowAchievementsDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Suas Conquistas</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[400px] py-4">
+            <div className="grid gap-4 md:grid-cols-1">
+              {/* Se a aba de medalhas for removida, este conteúdo pode ser movido diretamente para dentro do DialogContent */}
+              <Card className="border border-anime-purple/50 shadow-md">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-full bg-anime-purple/20 text-anime-purple">
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium">Sistema de Conquistas</h4>
+                      <p className="text-xs text-muted-foreground">Desbloqueie medalhas conforme sua jornada no mundo dos animes</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border border-anime-purple/50 shadow-md">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-full bg-anime-purple/20 text-anime-purple">
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 9H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M20 12H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M20 15H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M10 6H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M10 18H4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <rect x="14" y="3" width="6" height="6" rx="1" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <rect x="14" y="15" width="6" height="6" rx="1" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium">Sistema de Conquistas</h4>
+                      <p className="text-xs text-muted-foreground">Desbloqueie medalhas conforme sua jornada no mundo dos animes</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border border-anime-purple/50 shadow-md">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-full bg-anime-purple/20 text-anime-purple">
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 21L12 16L5 21V5C5 4.46957 5.21071 3.96086 5.58579 3.58579C5.96086 3.21071 6.46957 3 7 3H17C17.5304 3 18.0391 3.21071 18.4142 3.58579C18.7893 3.96086 19 4.46957 19 5V21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium">Sistema de Conquistas</h4>
+                      <p className="text-xs text-muted-foreground">Desbloqueie medalhas conforme sua jornada no mundo dos animes</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border border-anime-purple/50 shadow-md">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-full bg-anime-purple/20 text-anime-purple">
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5C21 3.89543 20.1046 3 19 3Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M9 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M15 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium">Sistema de Conquistas</h4>
+                      <p className="text-xs text-muted-foreground">Desbloqueie medalhas conforme sua jornada no mundo dos animes</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
