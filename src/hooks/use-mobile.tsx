@@ -13,13 +13,13 @@ export function useIsMobile() {
       }
     };
 
-    // Check on mount
+    {/* Verifica se é mobile ao montar */}
     checkIsMobile();
     
-    // Add event listener
+    {/* Adiciona um listener de evento */}
     window.addEventListener("resize", checkIsMobile);
     
-    // Cleanup
+    {/* Limpa o listener de evento */}
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
 

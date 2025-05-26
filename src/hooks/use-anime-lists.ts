@@ -20,7 +20,7 @@ export interface Anime {
   user_id: string;
 }
 
-// Fetch anime lists for the current user
+{/* Busca listas de animes para o usuário atual */}
 export const useAnimeLists = (status?: AnimeStatus) => {
   return useQuery({
     queryKey: ['anime-lists', status],
@@ -44,7 +44,7 @@ export const useAnimeLists = (status?: AnimeStatus) => {
   });
 };
 
-// Add a new anime to the list
+{/* Adiciona um novo anime à lista */}
 export const useAddAnime = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -86,7 +86,7 @@ export const useAddAnime = () => {
   });
 };
 
-// Update an anime in the list
+{/* Atualiza um anime na lista */}
 export const useUpdateAnime = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -123,7 +123,7 @@ export const useUpdateAnime = () => {
   });
 };
 
-// Delete an anime from the list
+{/* Remove um anime da lista */}
 export const useDeleteAnime = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -157,5 +157,5 @@ export const useDeleteAnime = () => {
   });
 };
 
-// Missing import for useAuth
+{/* Importa o hook de autenticação */}
 import { useAuth } from '@/contexts/AuthContext';

@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { AnimeProgress, UserAchievement } from '@/types/database';
 
-// Fetch progress for a specific anime
+{/* Busca o progresso de um anime específico */}
 export const useAnimeProgress = (animeListId: string) => {
   return useQuery({
     queryKey: ['anime-progress', animeListId],
@@ -25,7 +25,7 @@ export const useAnimeProgress = (animeListId: string) => {
   });
 };
 
-// Update episode progress
+{/* Atualiza o progresso de um episódio */}
 export const useUpdateProgress = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -44,7 +44,7 @@ export const useUpdateProgress = () => {
       
       const isCompleted = params.currentEpisode >= params.totalEpisodes;
       
-      // Update or create progress
+      {/* Atualiza ou cria o progresso */}
       const { data: progressData, error: progressError } = await supabase
         .from('anime_progress')
         .upsert({
@@ -62,7 +62,7 @@ export const useUpdateProgress = () => {
         throw progressError;
       }
       
-      // If completed and user is premium, create achievement
+      {/* Se o anime foi completado e o usuário é premium, cria uma conquista */}
       if (isCompleted && user.user_metadata?.is_premium) {
         const { error: achievementError } = await supabase
           .from('user_achievements')
@@ -107,7 +107,7 @@ export const useUpdateProgress = () => {
   });
 };
 
-// Fetch user achievements
+{/* Busca as conquistas do usuário */}
 export const useUserAchievements = () => {
   return useQuery({
     queryKey: ['user-achievements'],

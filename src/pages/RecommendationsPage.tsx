@@ -44,7 +44,7 @@ const RecommendationsPage = () => {
     });
   }, [isPremium, recommendations, trendingAnimes, allUserAnimes, isLoading, error]);
 
-  // Força verificação da assinatura quando a página carrega
+  {/* Força verificação da assinatura quando a página carrega */}
   useEffect(() => {
     if (user && session && !subscriptionLoading) {
       console.log('Verificando status da assinatura...', { subscribed: subscriptionData?.subscribed });
@@ -52,6 +52,7 @@ const RecommendationsPage = () => {
     }
   }, [user, session]);
 
+  {/* Adiciona um anime à lista */}
   const addToList = async (animeData: any) => {
     if (!user || !session) {
       toast({
@@ -93,6 +94,7 @@ const RecommendationsPage = () => {
     }
   };
 
+  {/* Renderiza a página de recomendações */}
   if (subscriptionLoading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -156,7 +158,7 @@ const RecommendationsPage = () => {
     );
   }
 
-  // Função para filtrar animes por gênero (corrigida)
+  {/* Função para filtrar animes por gênero (corrigida) */}
   const filterAnimesByGenre = (animes: any[], genre: string) => {
     if (!genre) return animes;
     
@@ -170,7 +172,7 @@ const RecommendationsPage = () => {
   const filteredRecommendations = filterAnimesByGenre(recommendations, selectedGenre);
   const filteredTrendingAnimes = filterAnimesByGenre(trendingAnimes, selectedGenre);
 
-  // Função para obter gêneros únicos e limitar a quantidade
+  {/* Função para obter gêneros únicos e limitar a quantidade */}
   const getUniqueGenres = () => {
     const allGenres = new Set<string>();
     
@@ -184,11 +186,12 @@ const RecommendationsPage = () => {
       }
     });
     
-    return Array.from(allGenres).slice(0, 12); // Limita a 12 gêneros
+    return Array.from(allGenres).slice(0, 12); {/* Limita a 12 gêneros */}
   };
 
   const availableGenres = getUniqueGenres();
 
+  {/* Renderiza a página de recomendações */}
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -207,6 +210,7 @@ const RecommendationsPage = () => {
     );
   }
 
+  {/* Renderiza a página de recomendações */}
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -224,7 +228,7 @@ const RecommendationsPage = () => {
         </Badge>
       </div>
 
-      {/* Info sobre como funciona a recomendação */}
+      {/* Informações sobre como funciona a recomendação */}
       <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
         <CardHeader>
           <CardTitle className="text-lg text-blue-800 dark:text-blue-200 flex items-center gap-2">
@@ -256,7 +260,7 @@ const RecommendationsPage = () => {
         </CardContent>
       </Card>
 
-      {/* Genre Filter */}
+      {/* Filtro de Gênero */}
       {availableGenres.length > 0 && (
         <Card>
           <CardHeader>
@@ -292,6 +296,7 @@ const RecommendationsPage = () => {
         </Card>
       )}
 
+      {/* Tabs */}
       <Tabs defaultValue="personalized" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="personalized">Para Você</TabsTrigger>
@@ -299,6 +304,7 @@ const RecommendationsPage = () => {
         </TabsList>
         
         <TabsContent value="personalized" className="space-y-4">
+          {/* Recomendações Personalizadas */}
           <Card>
             <CardHeader>
               <CardTitle>Recomendações Personalizadas</CardTitle>
@@ -357,6 +363,7 @@ const RecommendationsPage = () => {
         </TabsContent>
         
         <TabsContent value="trending" className="space-y-4">
+          {/* Animes em Alta */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

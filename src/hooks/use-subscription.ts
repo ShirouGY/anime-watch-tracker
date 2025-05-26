@@ -27,7 +27,7 @@ export const useSubscription = () => {
     try {
       console.log('Checking subscription for user:', user.email);
       
-      // Primeiro, vamos verificar na tabela profiles se is_premium está definido
+      {/* Primeiro, vamos verificar na tabela profiles se is_premium está definido */}
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('is_premium')
@@ -39,7 +39,7 @@ export const useSubscription = () => {
       } else {
         console.log('Profile premium status:', profileData?.is_premium);
         
-        // Se já temos o status premium no perfil, use ele
+        {/* Se já temos o status premium no perfil, use ele */}
         if (profileData?.is_premium === true) {
           console.log('User is premium according to profile');
           setSubscriptionData({ subscribed: true, subscription_tier: 'Premium' });
@@ -48,7 +48,7 @@ export const useSubscription = () => {
         }
       }
 
-      // Se não está no perfil ou é false, vamos verificar via Stripe
+      {/* Se não está no perfil ou é false, vamos verificar via Stripe */}
       console.log('Checking via Stripe API...');
       const { data, error } = await supabase.functions.invoke('check-subscription', {
         headers: {
@@ -58,7 +58,7 @@ export const useSubscription = () => {
 
       if (error) {
         console.error('Stripe subscription check error:', error);
-        // Em caso de erro na verificação, vamos assumir que não é premium
+        {/* Em caso de erro na verificação, vamos assumir que não é premium */}
         setSubscriptionData({ subscribed: false });
       } else {
         console.log('Stripe subscription data:', data);
@@ -66,7 +66,7 @@ export const useSubscription = () => {
       }
     } catch (error: any) {
       console.error('Error checking subscription:', error);
-      // Em caso de erro, vamos verificar localmente se há alguma indicação de premium
+      {/* Em caso de erro, vamos verificar localmente se há alguma indicação de premium */}
       setSubscriptionData({ subscribed: false });
       
       toast({
@@ -99,7 +99,7 @@ export const useSubscription = () => {
 
       if (error) throw error;
       
-      // Abrir Stripe Checkout em nova aba
+      {/* Abrir Stripe Checkout em nova aba */}
       window.open(data.url, '_blank');
     } catch (error: any) {
       console.error('Error creating checkout:', error);
@@ -126,7 +126,7 @@ export const useSubscription = () => {
 
       if (error) throw error;
       
-      // Abrir portal do cliente em nova aba
+      {/* Abrir portal do cliente em nova aba */}
       window.open(data.url, '_blank');
     } catch (error: any) {
       console.error('Error opening customer portal:', error);

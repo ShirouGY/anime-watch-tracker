@@ -29,6 +29,7 @@ export function AppSidebar() {
   const location = useLocation();
   const { signOut } = useAuth();
   
+  {/* Itens do menu */}
   const menuItems = [
     {
       title: "Início",
@@ -52,6 +53,7 @@ export function AppSidebar() {
     },
   ];
 
+  {/* Renderiza o sidebar */}
   return (
     <Sidebar className="border-r">
       <SidebarHeader className="flex justify-center items-center py-6">
@@ -60,13 +62,17 @@ export function AppSidebar() {
         </Link>
       </SidebarHeader>
       
+      {/* Conteúdo do sidebar */}
       <SidebarContent>
+        {/* Grupo de itens do menu */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs uppercase text-muted-foreground">
             Menu
           </SidebarGroupLabel>
           <SidebarGroupContent>
+            {/* Menu de itens do menu */}
             <SidebarMenu>
+              {/* Itens do menu */}
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild 
@@ -87,17 +93,20 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         
+        {/* Grupo de ações */}
         <SidebarGroup className="mt-4">
           <SidebarGroupLabel className="text-xs uppercase text-muted-foreground">
             Ações
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              {/* Botão para adicionar um anime */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild className="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90">
                   <AddAnimeDialog />
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              {/* Botão para sair */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild className="text-red-500 hover:bg-red-500/10" onClick={signOut}>
                   <Button variant="ghost" className="w-full flex gap-2 items-center justify-center text-red-500">
@@ -111,9 +120,11 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       
+      {/* Rodapé do sidebar */}
       <SidebarFooter>
         <div className="p-4">
           <div className="flex items-center gap-2">
+            {/* Botão para abrir as configurações */}
             <Settings size={16} className="text-muted-foreground" />
             <Link to="/settings" className="text-xs text-muted-foreground hover:text-primary transition-colors">
               Configurações

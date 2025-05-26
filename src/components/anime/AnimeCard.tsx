@@ -41,7 +41,7 @@ export function AnimeCard({
     setIsUpdating(true);
     
     try {
-      // Mark as watched by completing all episodes
+      {/* Marca como assistido completando todos os episódios */}
       await updateProgressMutation.mutateAsync({
         animeListId: anime.id,
         currentEpisode: anime.episodes || 1,
@@ -51,13 +51,14 @@ export function AnimeCard({
         animeIcon: anime.image,
       });
       
-      // Call the parent handler to move it to watched list
+      {/* Chama o handler do pai para mover para a lista de assistidos */}
       onMarkAsWatched(anime.id);
     } finally {
       setIsUpdating(false);
     }
   };
 
+  {/* Renderiza as estrelas */}
   const renderStars = () => {
     const currentRating = hoveredRating || anime.rating || 0;
     return (
@@ -81,6 +82,7 @@ export function AnimeCard({
     );
   };
 
+  {/* Renderiza o card */}
   return (
     <Card className="overflow-hidden anime-card">
       <div className="relative">
@@ -113,7 +115,7 @@ export function AnimeCard({
       </div>
       
       <div className="p-3">
-        {/* Progress bar for watchlist animes */}
+        {/* Progress bar para animes na watchlist */}
         {!isWatched && <AnimeProgressBar anime={anime} />}
         
         <div className="flex justify-between gap-2 mt-3">

@@ -27,7 +27,7 @@ export function AchievementsSection() {
   
   const isPremium = user?.user_metadata?.is_premium;
 
-  // Definir todas as conquistas possíveis
+  {/* Definir todas as conquistas possíveis */}
   const allAchievements = [
     {
       id: 'first_anime',
@@ -152,7 +152,7 @@ export function AchievementsSection() {
     }
   ];
   
-  // Verificar quais conquistas o usuário já desbloqueou
+  {/* Verificar quais conquistas o usuário já desbloqueou */}
   const unlockedAchievementIds = userAchievements?.map(a => a.achievement_type) || [];
   
   const achievementsWithStatus = allAchievements.map(achievement => {
@@ -263,6 +263,7 @@ export function AchievementsSection() {
         </div>
       )}
 
+      {/* Seção de avatares premium */}
       {!isPremium && (
         <div className="space-y-3">
           <h4 className="font-medium text-anime-purple flex items-center gap-2">
@@ -284,6 +285,7 @@ export function AchievementsSection() {
         </div>
       )}
       
+      {/* Seção de conquistas */}
       {categories.map(category => (
         <div key={category} className="space-y-3">
           <h4 className="font-medium text-anime-purple">{category}</h4>

@@ -42,6 +42,7 @@ export function AddAnimeDialog({ onClose }: AddAnimeDialogProps) {
     },
   });
   
+  {/* Função para mudar o estado do dialog */}
   const handleDialogChange = (open: boolean) => {
     setOpen(open);
     if (!open && onClose) {
@@ -49,15 +50,18 @@ export function AddAnimeDialog({ onClose }: AddAnimeDialogProps) {
     }
   };
   
+  {/* Função para buscar um anime */}
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Search is already handled by the useAnimeSearch hook
+    {/* Busca já é tratada pelo hook useAnimeSearch */}
   };
   
+  {/* Função para selecionar um anime */}
   const handleSelectAnime = (anime: AnimeSearchResult) => {
     setSelectedAnime(anime);
   };
   
+  {/* Função para adicionar um anime à lista */}
   const handleAddToList = () => {
     if (!selectedAnime) return;
     
@@ -77,6 +81,7 @@ export function AddAnimeDialog({ onClose }: AddAnimeDialogProps) {
     setSelectedAnime(null);
   };
   
+  {/* Função para adicionar um anime manualmente */}
   const handleManualSubmit = (values: z.infer<typeof manualAnimeSchema>) => {
     addAnimeMutation.mutate({
       anime_id: `manual-${Date.now()}`,
@@ -93,6 +98,7 @@ export function AddAnimeDialog({ onClose }: AddAnimeDialogProps) {
     form.reset();
   };
   
+  {/* Renderiza o dialog */}
   return (
     <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogTrigger asChild>
@@ -125,6 +131,7 @@ export function AddAnimeDialog({ onClose }: AddAnimeDialogProps) {
               </div>
             )}
             
+            {/* Se houver resultados, mostra os animes */}
             {searchResults && searchResults.length > 0 ? (
               <div className="space-y-2">
                 {searchResults.map((anime) => (
@@ -164,6 +171,7 @@ export function AddAnimeDialog({ onClose }: AddAnimeDialogProps) {
             ) : null}
           </div>
           
+          {/* Se um anime foi selecionado, mostra as informações */}
           {selectedAnime && (
             <div className="p-4 border rounded-md">
               <div className="flex justify-between items-center mb-2">
@@ -173,6 +181,7 @@ export function AddAnimeDialog({ onClose }: AddAnimeDialogProps) {
                 </Button>
               </div>
               
+              {/* Imagem e informações do anime selecionado */}
               <div className="flex gap-3">
                 <img
                   src={getAnimeImageUrl(selectedAnime)}
@@ -182,6 +191,7 @@ export function AddAnimeDialog({ onClose }: AddAnimeDialogProps) {
                     (e.target as HTMLImageElement).src = 'https://via.placeholder.com/100x150?text=Sem+Imagem';
                   }}
                 />
+                {/* Informações do anime selecionado */}
                 <div>
                   <h5>{selectedAnime.title}</h5>
                   <p className="text-sm text-muted-foreground">
@@ -191,6 +201,7 @@ export function AddAnimeDialog({ onClose }: AddAnimeDialogProps) {
                 </div>
               </div>
               
+              {/* Botão para adicionar o anime à lista */}
               <Button 
                 onClick={handleAddToList} 
                 className="w-full mt-3"
@@ -206,6 +217,7 @@ export function AddAnimeDialog({ onClose }: AddAnimeDialogProps) {
             </div>
           )}
           
+          {/* Divisor */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t"></span>
@@ -217,6 +229,7 @@ export function AddAnimeDialog({ onClose }: AddAnimeDialogProps) {
             </div>
           </div>
           
+          {/* Formulário para adicionar um anime manualmente */}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleManualSubmit)} className="space-y-4">
               <FormField
@@ -233,6 +246,7 @@ export function AddAnimeDialog({ onClose }: AddAnimeDialogProps) {
                 )}
               />
               
+              {/* Campo para adicionar o número de episódios */}
               <div className="grid grid-cols-2 gap-2">
                 <FormField
                   control={form.control}
@@ -254,6 +268,7 @@ export function AddAnimeDialog({ onClose }: AddAnimeDialogProps) {
                   )}
                 />
                 
+                {/* Campo para adicionar o ano de lançamento */}
                 <FormField
                   control={form.control}
                   name="year"
@@ -276,6 +291,7 @@ export function AddAnimeDialog({ onClose }: AddAnimeDialogProps) {
                 />
               </div>
               
+              {/* Campo para adicionar a URL da imagem */}
               <FormField
                 control={form.control}
                 name="image"

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -10,36 +9,37 @@ import { useAnimeLists, Anime } from "@/hooks/use-anime-lists";
 const DashboardPage = () => {
   const [progressValue, setProgressValue] = useState(0);
   
-  // Fetch all anime lists data
+  {/* Busca todos os dados das listas de animes do usuário */}
   const { data: allAnimes, isLoading } = useAnimeLists();
   
-  // Fetch completed animes specifically
+  {/* Busca especificamente os animes completados */}
   const { data: watchedAnimes } = useAnimeLists('completed');
   
-  // Calculate statistics
+  {/* Cálculo de estatísticas */}
+  {/* Total de animes assistidos */}
   const totalWatched = watchedAnimes?.length || 0;
   
-  // Calculate total hours - assuming each episode is about 24 minutes (0.4 hours)
+  {/* Calcula o total de horas assistidas (assumindo ~24 minutos por episódio) */}
   const totalHours = watchedAnimes?.reduce((acc, anime) => 
     acc + (anime.episodes || 0) * 0.4, 0
   ).toFixed(1) || "0.0";
   
-  // Calculate average rating
+  {/* Calcula a nota média dos animes avaliados */}
   const averageRating = watchedAnimes?.length 
     ? (watchedAnimes.reduce((acc, anime) => acc + (anime.rating || 0), 0) / 
        watchedAnimes.filter(anime => anime.rating != null).length).toFixed(1)
     : "0.0";
   
-  // Calculate otaku level - 1 level for every 5 animes
+  {/* Calcula o nível de otaku (1 nível a cada 5 animes assistidos) */}
   const currentLevel = Math.floor(totalWatched / 5) || 0;
   
-  // Calculate progress to next level
+  {/* Calcula o progresso para o próximo nível */}
   const nextLevelProgress = totalWatched ? ((totalWatched % 5) / 5) * 100 : 0;
   
-  // Recent animes - last 4 watched
+  {/* Animes recentes (últimos 4 assistidos) */}
   const recentAnimes = watchedAnimes?.slice(0, 4) || [];
   
-  // Recommended animes - different status anime
+  {/* Animes recomendados (animes com status 'plan_to_watch') */}
   const recommendedAnimes = allAnimes?.filter(anime => anime.status === 'plan_to_watch')?.slice(0, 4) || [];
   
   useEffect(() => {
@@ -47,6 +47,7 @@ const DashboardPage = () => {
     return () => clearTimeout(timer);
   }, [nextLevelProgress]);
 
+  {/* Renderiza o dashboard */}
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
@@ -55,6 +56,7 @@ const DashboardPage = () => {
       </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Total Assistidos */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Assistidos</CardTitle>
@@ -74,6 +76,7 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
         
+        {/* Horas Assistidas */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Horas Assistidas</CardTitle>
@@ -93,6 +96,7 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
         
+        {/* Nota Média */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Nota Média</CardTitle>
@@ -114,6 +118,7 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
         
+        {/* Nível de Otaku */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Nível de Otaku</CardTitle>
@@ -137,12 +142,14 @@ const DashboardPage = () => {
         </Card>
       </div>
       
+      {/* Tabs */}
       <Tabs defaultValue="recent" className="w-full">
         <TabsList>
           <TabsTrigger value="recent">Recentemente Assistidos</TabsTrigger>
           <TabsTrigger value="recommended">Recomendados</TabsTrigger>
         </TabsList>
         <TabsContent value="recent" className="mt-4">
+          {/* Recentemente Assistidos */}
           {isLoading ? (
             <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
               {Array(4).fill(0).map((_, i) => (
@@ -187,6 +194,7 @@ const DashboardPage = () => {
           )}
         </TabsContent>
         <TabsContent value="recommended" className="mt-4">
+          {/* Recomendados */}
           {isLoading ? (
             <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
               {Array(4).fill(0).map((_, i) => (

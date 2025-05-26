@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AvatarOption } from '@/types/avatar';
 import { supabase } from '@/integrations/supabase/client';
 
-// Mapeamento expandido de avatares para animes
+{/* Mapeamento expandido de avatares para animes */}
 const AVATAR_ANIME_MAPPING: Record<string, { animeId: string; animeTitle: string }> = {
   'naruto.png': { animeId: '20', animeTitle: 'Naruto' },
   'sasuke.png': { animeId: '20', animeTitle: 'Naruto' },
@@ -40,7 +40,7 @@ export const useAvatarUnlocks = (availableAvatars: AvatarOption[] = []) => {
           return { ...avatar, isUnlocked: false };
         }
 
-        // Para avatares premium, verificar se o usuário assistiu o anime correspondente
+        {/* Para avatares premium, verificar se o usuário assistiu o anime correspondente */}
         if (avatar.animeId && completedAnimes) {
           const hasWatchedAnime = completedAnimes.some(
             anime => anime.anime_id === avatar.animeId
@@ -48,7 +48,7 @@ export const useAvatarUnlocks = (availableAvatars: AvatarOption[] = []) => {
           return { ...avatar, isUnlocked: hasWatchedAnime };
         }
 
-        // Se não tem animeId associado, liberar para usuários premium
+        {/* Se não tem animeId associado, liberar para usuários premium */}
         return { ...avatar, isUnlocked: true };
       });
     },
@@ -56,7 +56,7 @@ export const useAvatarUnlocks = (availableAvatars: AvatarOption[] = []) => {
   });
 };
 
-// Hook específico para buscar avatares premium e calcular progresso
+{/* Hook específico para buscar avatares premium e calcular progresso */}
 export const usePremiumAvatarProgress = () => {
   const { user } = useAuth();
   const { data: completedAnimes } = useAnimeLists('completed');
@@ -68,7 +68,7 @@ export const usePremiumAvatarProgress = () => {
       if (!isPremium) return [];
 
       try {
-        // Buscar avatares premium do S3
+        {/* Busca avatares premium do S3 */}
         const { data: premiumFiles, error } = await supabase.storage
           .from('avatar-icons')
           .list('icons_premium');

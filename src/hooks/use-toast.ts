@@ -89,17 +89,18 @@ export const reducer = (state: State, action: Action): State => {
 
     case "DISMISS_TOAST": {
       const { toastId } = action
-
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
+      
+      {/* Adiciona o toast à fila de remoção */}
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
+        {/* Adiciona todos os toasts à fila de remoção */}
         state.toasts.forEach((toast) => {
           addToRemoveQueue(toast.id)
         })
       }
 
+      {/* Fecha o toast */}
       return {
         ...state,
         toasts: state.toasts.map((t) =>
@@ -114,11 +115,14 @@ export const reducer = (state: State, action: Action): State => {
     }
     case "REMOVE_TOAST":
       if (action.toastId === undefined) {
+        {/* Remove todos os toasts */}
         return {
           ...state,
           toasts: [],
         }
       }
+
+      {/* Remove o toast específico */}
       return {
         ...state,
         toasts: state.toasts.filter((t) => t.id !== action.toastId),
@@ -126,10 +130,12 @@ export const reducer = (state: State, action: Action): State => {
   }
 }
 
+{/* Array de listeners */}
 const listeners: Array<(state: State) => void> = []
 
 let memoryState: State = { toasts: [] }
 
+{/* Dispara a ação */}
 function dispatch(action: Action) {
   memoryState = reducer(memoryState, action)
   listeners.forEach((listener) => {
@@ -137,8 +143,10 @@ function dispatch(action: Action) {
   })
 }
 
+{/* Tipo de toast */}
 type Toast = Omit<ToasterToast, "id">
 
+{/* Função para criar um toast */}
 function toast({ ...props }: Toast) {
   const id = genId()
 
@@ -168,6 +176,7 @@ function toast({ ...props }: Toast) {
   }
 }
 
+{/* Hook para usar o toast */}
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 

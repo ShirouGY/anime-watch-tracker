@@ -16,11 +16,12 @@ const RegisterPage = () => {
   const [passwordError, setPasswordError] = useState('');
   const { signUp, user } = useAuth();
 
-  // If already logged in, redirect to dashboard
+  {/* Se já estiver logado, redireciona para o dashboard */}
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
 
+  {/* Função para fazer o registro */}
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError('');
@@ -41,6 +42,7 @@ const RegisterPage = () => {
     }
   };
 
+  {/* Renderiza a página de registro */}
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-anime-navy to-black">
       <Card className="w-full max-w-md border-anime-purple/20">
@@ -102,6 +104,7 @@ const RegisterPage = () => {
             </Button>
           </CardContent>
         </form>
+        {/* Rodapé */}
         <CardFooter className="flex justify-center">
           <div className="text-sm text-muted-foreground text-center">
             Já tem uma conta?{" "}

@@ -186,37 +186,7 @@ O SoloAnimeList utiliza um modelo **freemium** que oferece funcionalidades bási
 - Plano gratuito suficiente inicialmente
 - Pro: $20/mês se necessário
 
-#### 📱 Marketing & Operações
-**Ferramentas:**
-- Google Analytics: Gratuito
-- Hotjar (UX): $32/mês
-- Customer support: $0 (inicial)
-
 **Total mensal estimado:** R$ 300-500
-
-### 🎯 Métricas de Sucesso
-
-#### 📊 KPIs Principais
-**Aquisição:**
-- CAC por canal
-- Taxa de conversão (visitante → usuário)
-- Growth rate mensal
-
-**Retenção:**
-- Daily/Weekly/Monthly Active Users
-- Churn rate mensal
-- Tempo médio na plataforma
-
-**Monetização:**
-- ARPU
-- LTV
-- Taxa de conversão Free → Premium
-- MRR (Monthly Recurring Revenue)
-
-**Engagement:**
-- Animes adicionados por usuário/mês
-- Reviews por usuário ativo
-- Sessões por usuário/semana
 
 ### 🚀 Roadmap de Crescimento
 
@@ -231,13 +201,6 @@ O SoloAnimeList utiliza um modelo **freemium** que oferece funcionalidades bási
 - 🎯 200+ usuários premium
 - 🎯 Lançamento do app mobile
 - 🎯 Parcerias com influenciadores
-
-#### 🌟 Fase 3 (12-18 meses): Expansão
-- 🎯 15.000+ usuários
-- 🎯 Expansão para outros países (LATAM)
-- 🎯 Features sociais avançadas
-- 🎯 API para desenvolvedores
-
 ### 🎉 Vantagem Competitiva
 
 **Diferenciais do SoloAnimeList:**
@@ -426,7 +389,24 @@ anime_lists (id, user_id, anime_id, title, image, episodes, year, status, rating
 
 -- Progresso de episódios
 anime_progress (id, user_id, anime_id, current_episode, total_episodes)
-```
+
+A tabela anime_lists no Supabase contém campos similares ao JSON do desafio:
+
+id - ID único do registro
+anime_id - ID do anime (equivalente ao "id" do JSON)
+title - Título do anime
+image - URL da imagem (equivalente ao "image")
+rating - Avaliação (equivalente ao "rating")
+episodes - Número de episódios
+year - Ano de lançamento
+status - Status (watching, completed, plan_to_watch)
+user_id - ID do usuário
+notes - Notas do usuário
+
+# 🔄 Como os dados são consumidos
+API Externa: Você usa a Jikan API para buscar animes
+Banco Local: Os dados são salvos na tabela anime_lists do Supabase
+Hooks: O useAnimeLists busca e gerencia os dados
 
 ### Storage Buckets:
 - `avatar-icons/`: Armazenamento de avatares
@@ -452,16 +432,10 @@ anime_progress (id, user_id, anime_id, current_episode, total_episodes)
    - Configure os Edge Functions para Stripe
    - Adicione os secrets necessários (Stripe keys)
 
-4. **Configure variáveis de ambiente:**
-   ```env
-   VITE_SUPABASE_URL=sua_supabase_url
-   VITE_SUPABASE_ANON_KEY=sua_anon_key
-   ```
-
 5. **Inicie o desenvolvimento:**
    ```bash
-   npm run dev
-   ```
+npm run dev
+```
 
 ## 💎 Recursos Premium
 
@@ -490,6 +464,3 @@ anime_progress (id, user_id, anime_id, current_episode, total_episodes)
 - **Produtos**: Assinatura mensal R$ 19,99
 - **Portal do cliente** para autogestão
 
-## 🔒 Licença
-
-Este projeto está licenciado sob a [Licença MIT](https://opensource.org/licenses/MIT).

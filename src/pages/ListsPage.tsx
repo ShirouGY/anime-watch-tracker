@@ -16,12 +16,15 @@ const ListsPage = () => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
 
+  {/* Verifica se o usuário é premium */}
   const isPremium = user?.user_metadata?.is_premium;
 
+  {/* Remove um anime da lista */}
   const handleRemoveAnime = (animeId: string) => {
     deleteAnimeMutation.mutate(animeId);
   };
 
+  {/* Move um anime para a lista de assistidos */}
   const handleMoveToWatched = (animeId: string) => {
     updateAnimeMutation.mutate({
       id: animeId,
@@ -33,6 +36,7 @@ const ListsPage = () => {
     });
   };
   
+  {/* Avalia um anime */}
   const handleRateAnime = (animeId: string, rating: number) => {
     updateAnimeMutation.mutate({
       id: animeId,
@@ -44,6 +48,7 @@ const ListsPage = () => {
     });
   };
   
+  {/* Renderiza as listas de animes */}
   return (
     <div className="space-y-4 animate-fade-in w-full">
       <div className="flex flex-col gap-4">

@@ -7,9 +7,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Menu } from "lucide-react";
 import { Button } from "./ui/button";
 
+{/* Layout da aplicação */}
 export function AppLayout() {
   const isMobile = useIsMobile();
   
+  {/* Renderiza o layout */}
   return (
     <div className="min-h-screen w-full bg-background">
       <SidebarProvider>
@@ -24,6 +26,7 @@ export function AppLayout() {
                 "flex items-center mb-6",
                 isMobile ? "justify-between" : "justify-end"
               )}>
+                {/* Botão para abrir o sidebar */}
                 {isMobile && (
                   <SidebarTrigger>
                     <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0">
@@ -31,6 +34,7 @@ export function AppLayout() {
                     </Button>
                   </SidebarTrigger>
                 )}
+                {/* Área para notificações ou outras funcionalidades do cabeçalho */}
                 <div className="flex items-center gap-2">
                   {/* Area para notificações ou outras funcionalidades do cabeçalho */}
                 </div>

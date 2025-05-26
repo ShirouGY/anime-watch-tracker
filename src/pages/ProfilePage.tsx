@@ -32,10 +32,10 @@ const ProfilePage = () => {
   const { user } = useAuth();
   const [showAchievementsDialog, setShowAchievementsDialog] = useState(false);
   
-  // Hook de assinatura
+  {/* Hook de assinatura */}
   const { subscriptionData, isLoading: subscriptionLoading, createCheckout, openCustomerPortal, checkSubscription } = useSubscription();
   
-  // Novo estado para armazenar avatares premium com URLs públicas
+  {/* Novo estado para armazenar avatares premium com URLs públicas */}
   const [premiumAvatarsWithUrls, setPremiumAvatarsWithUrls] = useState<Array<{ filename: string; url: string }>>([]);
   const [loadingAvatars, setLoadingAvatars] = useState(true);
   
@@ -50,7 +50,7 @@ const ProfilePage = () => {
   
   useEffect(() => {
     if (user) {
-      // Fetch user profile
+      {/* Fetch user profile */}
       const fetchUserProfile = async () => {
         try {
           const { data, error } = await supabase
@@ -77,7 +77,7 @@ const ProfilePage = () => {
         }
       };
       
-      // Nova função para buscar avatares premium do Storage
+      {/* Função para buscar avatares premium do Storage */}
       const fetchPremiumAvatars = async () => {
         setLoadingAvatars(true);
         try {
@@ -110,7 +110,7 @@ const ProfilePage = () => {
     }
   }, [user, subscriptionData?.subscribed]);
 
-  // Atualizar estado local quando os dados da assinatura mudarem
+  {/* Atualizar estado local quando os dados da assinatura mudarem */}
   useEffect(() => {
     if (subscriptionData?.subscribed !== undefined) {
       setIsPremium(subscriptionData.subscribed);
@@ -119,7 +119,7 @@ const ProfilePage = () => {
   
   const isLoading = loadingWatched || loadingWatching || loadingPlanToWatch;
   
-  // Calculate statistics
+  {/* Calculate statistics */}
   const allAnimes = [...(watchedAnimes || []), ...(watchingAnimes || []), ...(planToWatchAnimes || [])];
   const totalWatched = watchedAnimes ? watchedAnimes.length : 0;
   const totalHours = watchedAnimes 
@@ -130,7 +130,7 @@ const ProfilePage = () => {
     ? (watchedAnimes.reduce((acc, anime) => acc + (anime.rating || 0), 0) / totalWatched).toFixed(1) 
     : "0.0";
   
-  // Calculate otaku level based on watched anime count
+  {/* Calculate otaku level based on watched anime count */}
   const getOtakuLevel = () => {
     if (totalWatched >= 25) return 5;
     if (totalWatched >= 15) return 4;
@@ -146,7 +146,7 @@ const ProfilePage = () => {
     setAvatar(url);
   };
   
-  // Filtra avatares premium com animeId para as conquistas
+  {/* Filtra avatares premium com animeId para as conquistas */}
   const animeLinkedPremiumAvatars = useMemo(() => {
     return premiumAvatarsWithUrls
       .map(avatarFile => {
@@ -165,7 +165,7 @@ const ProfilePage = () => {
       .filter(avatar => avatar !== null);
   }, [premiumAvatarsWithUrls, isPremium, completedAnimeIdsSet]);
 
-  // Calcula o progresso
+  {/* Calcula o progresso */}
   const totalAnimeLinkedAvatars = animeLinkedPremiumAvatars.length;
   const unlockedAnimeLinkedAvatars = animeLinkedPremiumAvatars.filter(avatar => avatar.isUnlocked).length;
   const avatarProgressPercentage = totalAnimeLinkedAvatars > 0 ? (unlockedAnimeLinkedAvatars / totalAnimeLinkedAvatars) * 100 : 0;
@@ -179,6 +179,7 @@ const ProfilePage = () => {
     );
   }
   
+  {/* Renderiza o perfil */}
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col md:flex-row gap-6 items-start">
@@ -190,6 +191,7 @@ const ProfilePage = () => {
                   <AvatarImage src={avatar || "https://i.imgur.com/7LdpJKQ.png"} alt="Foto de perfil" />
                   <AvatarFallback>{username?.substring(0, 2) || "OU"}</AvatarFallback>
                 </Avatar>
+                {/* AvatarSelector */}
                 <AvatarSelector 
                   currentAvatar={avatar} 
                   onAvatarChange={handleAvatarChange}
@@ -197,9 +199,11 @@ const ProfilePage = () => {
                   completedAnimeIds={completedAnimeIdsSet}
                 />
               </div>
+              {/* Username */}
               <h2 className="mt-4 text-xl font-bold">{username || "Otaku User"}</h2>
+              {/* Email */}
               <p className="text-sm text-muted-foreground">{user?.email || "otaku@example.com"}</p>
-              
+              {/* Badges */}
               <div className="flex items-center mt-2 gap-2">
                 <Badge variant="outline" className="flex items-center gap-1 border-anime-purple">
                   <Medal className="h-3 w-3 text-anime-purple" />
@@ -214,6 +218,7 @@ const ProfilePage = () => {
                 )}
               </div>
               
+              {/* Assinar Premium */}
               {!isPremium && (
                 <div className="mt-6 w-full">
                   <Button 
@@ -230,6 +235,7 @@ const ProfilePage = () => {
                 </div>
               )}
               
+              {/* Gerenciar Assinatura */}
               {isPremium && (
                 <div className="mt-6 w-full space-y-2">
                   <Button 
@@ -249,6 +255,7 @@ const ProfilePage = () => {
                 </div>
               )}
               
+              {/* Conquistas e Verificar Status */}
               <div className="w-full mt-6 space-y-3">
                 <Button 
                   variant="outline" 
@@ -272,6 +279,7 @@ const ProfilePage = () => {
           </CardContent>
         </Card>
         
+        {/* Estatísticas */}
         <div className="flex-1 space-y-6">
           <Card>
             <CardHeader>
@@ -307,6 +315,7 @@ const ProfilePage = () => {
             </CardContent>
           </Card>
           
+          {/* Tabs */}
           <Tabs defaultValue="conquistas">
             <TabsList>
               <TabsTrigger value="conquistas">Conquistas</TabsTrigger>
@@ -317,6 +326,7 @@ const ProfilePage = () => {
             </TabsList>
             
             <TabsContent value="conquistas" className="space-y-4 mt-4">
+              {/* Conquistas */}
               <Card>
                 <CardHeader>
                   <CardTitle>Sistema de Conquistas</CardTitle>
@@ -329,6 +339,7 @@ const ProfilePage = () => {
             </TabsContent>
             
             <TabsContent value="history" className="space-y-4 mt-4">
+              {/* Histórico */}
               <Card>
                 <CardHeader>
                   <CardTitle>Histórico de Atividades</CardTitle>
@@ -369,6 +380,7 @@ const ProfilePage = () => {
             
             {isPremium && (
               <TabsContent value="premium" className="space-y-4 mt-4">
+                {/* Recursos Premium */}
                 <Card>
                   <CardHeader>
                     <CardTitle>Recursos Premium</CardTitle>
@@ -394,6 +406,7 @@ const ProfilePage = () => {
                         </CardContent>
                       </Card>
                       
+                      {/* Sem Anúncios */}
                       <Card className="border border-anime-purple/20">
                         <CardContent className="p-4">
                           <div className="flex items-center gap-3">
@@ -408,6 +421,7 @@ const ProfilePage = () => {
                         </CardContent>
                       </Card>
                       
+                      {/* Backup na Nuvem */}
                       <Card className="border border-anime-purple/20">
                         <CardContent className="p-4">
                           <div className="flex items-center gap-3">
@@ -422,6 +436,7 @@ const ProfilePage = () => {
                         </CardContent>
                       </Card>
                       
+                      {/* Conquistas Avançadas */}
                       <Card className="border border-anime-purple/20">
                         <CardContent className="p-4">
                           <div className="flex items-center gap-3">
@@ -444,6 +459,7 @@ const ProfilePage = () => {
         </div>
       </div>
       
+      {/* Dialog de Conquistas */}
       <Dialog open={showAchievementsDialog} onOpenChange={setShowAchievementsDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>

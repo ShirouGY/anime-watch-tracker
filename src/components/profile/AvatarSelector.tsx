@@ -60,7 +60,7 @@ export function AvatarSelector({
 
           const allAvatars: AvatarOption[] = [];
 
-          // Process premium icons
+          {/* Processa os ícones premium */}
           if (premiumIcons) {
             premiumIcons.forEach((file: AvatarFile) => {
               const { data: { publicUrl } } = supabase.storage
@@ -82,7 +82,7 @@ export function AvatarSelector({
             });
           }
 
-          // Process free icons (garante que isUnlocked seja true)
+          {/* Processa os ícones gratuitos (garante que isUnlocked seja true) */}
           if (freeIcons) {
             freeIcons.forEach((file: AvatarFile) => {
               const { data: { publicUrl } } = supabase.storage
@@ -117,7 +117,7 @@ export function AvatarSelector({
   const handleSelectAvatar = async (avatarOption: AvatarOption) => {
     if (!user) return;
 
-    // Nova lógica de verificação direta
+    {/* Nova lógica de verificação direta */}
     let canSelect = true;
     let reason = "";
 
@@ -136,7 +136,7 @@ export function AvatarSelector({
         variant: "destructive",
         description: reason || "Este avatar ainda não foi desbloqueado!"
       });
-      return; // Impede a seleção
+      return; {/* Impede a seleção */}
     }
 
     try {
@@ -161,8 +161,10 @@ export function AvatarSelector({
     }
   };
 
+  {/* Renderiza o selectors */}
   const avatarsToDisplay = availableAvatars;
 
+  {/* Renderiza o dialog */}
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -190,12 +192,14 @@ export function AvatarSelector({
         </Button>
       </DialogTrigger>
 
+      {/* Conteúdo do dialog */}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Escolha um avatar</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          {/* Se estiver carregando, mostra os skeletons */}
           {loadingAvatars ? (
             <div className="grid grid-cols-3 gap-4">
               {Array(6).fill(0).map((_, i) => (
@@ -232,6 +236,7 @@ export function AvatarSelector({
                       )}
                     </button>
                     
+                    {/* Se for premium, mostra o badge */}
                     {avatarOption.isPremium && (
                       <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-500 to-amber-500 text-white p-1 h-6 w-6 rounded-full flex items-center justify-center">
                         <Crown className="h-3 w-3" />
@@ -239,6 +244,7 @@ export function AvatarSelector({
                     )}
                   </div>
                   
+                  {/* Se for premium e tiver um anime relacionado, mostra o nome do anime */}
                   {avatarOption.isPremium && avatarOption.animeTitle && !avatarOption.isUnlocked && (
                     <p className="text-xs text-center text-muted-foreground">
                       Assista {avatarOption.animeTitle}

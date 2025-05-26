@@ -31,7 +31,7 @@ export async function searchAnimeByName(query: string): Promise<AnimeSearchResul
   }
   
   try {
-    // Add a small delay to avoid rate limiting
+    {/* Adiciona um pequeno delay para evitar a limitação de taxa */}
     await new Promise(resolve => setTimeout(resolve, 300));
     
     const response = await fetch(`${JIKAN_API_BASE}/anime?q=${encodeURIComponent(query)}&limit=10`);
@@ -48,6 +48,7 @@ export async function searchAnimeByName(query: string): Promise<AnimeSearchResul
   }
 }
 
+{/* Hook para buscar animes por nome */}
 export function useAnimeSearch(query: string) {
   return useQuery({
     queryKey: ['anime-search', query],
@@ -58,6 +59,7 @@ export function useAnimeSearch(query: string) {
   });
 }
 
+{/* Função para obter a URL da imagem do anime */}
 export function getAnimeImageUrl(anime: AnimeSearchResult): string {
   return anime.images.jpg.image_url || anime.images.webp.image_url || '';
 }

@@ -15,11 +15,12 @@ const LoginPage = () => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const { signIn, signInWithGoogle, user } = useAuth();
 
-  // If already logged in, redirect to dashboard
+  {/* Se o usuário já estiver logado, redireciona para o dashboard */}
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
 
+  {/* Função para fazer login */}
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -33,6 +34,7 @@ const LoginPage = () => {
     }
   };
 
+  {/* Função para fazer login com Google */}
   const handleGoogleLogin = async () => {
     if (isGoogleLoading) return;
     
@@ -48,6 +50,7 @@ const LoginPage = () => {
     }
   };
 
+  {/* Renderiza o login */}
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-anime-navy to-black">
       <Card className="w-full max-w-md border-anime-purple/20">
@@ -94,6 +97,7 @@ const LoginPage = () => {
                 required
               />
             </div>
+            {/* Botão de login */}
             <Button 
               type="submit" 
               className="w-full bg-anime-purple hover:bg-anime-purple/90"
@@ -101,7 +105,7 @@ const LoginPage = () => {
             >
               {isLoading ? "Entrando..." : "Entrar"}
             </Button>
-            
+            {/* Divisor */}
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border"></span>
@@ -110,7 +114,7 @@ const LoginPage = () => {
                 <span className="bg-card px-2 text-muted-foreground">ou continue com</span>
               </div>
             </div>
-            
+            {/* Botão de login com Google */}
             <Button 
               type="button" 
               variant="outline" 
@@ -118,6 +122,7 @@ const LoginPage = () => {
               onClick={handleGoogleLogin}
               disabled={isLoading || isGoogleLoading}
             >
+              {/* Botão de login com Google */}
               {isGoogleLoading ? (
                 "Carregando..."
               ) : (
@@ -146,6 +151,7 @@ const LoginPage = () => {
             </Button>
           </CardContent>
         </form>
+        {/* Rodapé */}
         <CardFooter className="flex justify-center">
           <div className="text-sm text-muted-foreground">
             Não tem uma conta?{" "}

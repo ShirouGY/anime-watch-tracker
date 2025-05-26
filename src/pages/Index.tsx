@@ -6,7 +6,7 @@ const Index = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Redireciona para a página de login ao acessar a raiz
+    {/* Redireciona para a página de login ao acessar a raiz */}
     navigate('/login');
   }, [navigate]);
 
