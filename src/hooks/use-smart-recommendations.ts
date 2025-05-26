@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { useAnimeLists } from './use-anime-lists';
 
@@ -19,6 +18,9 @@ interface RecommendationAnime {
 }
 
 const JIKAN_API_BASE = 'https://api.jikan.moe/v4';
+
+// Modo de desenvolvimento - pode ser ativado para teste
+const DEV_MODE = true; // Temporariamente true para teste
 
 async function fetchRecommendationsByGenre(genres: string[]): Promise<RecommendationAnime[]> {
   console.log('Buscando recomendações para gêneros:', genres);
@@ -230,15 +232,20 @@ function getSimulatedGenres(title: string): string[] {
 export function useSmartRecommendations(isPremium: boolean) {
   const { data: userAnimes } = useAnimeLists();
   
+  // Em modo de desenvolvimento, sempre permitir recomendações
+  const shouldFetchRecommendations = DEV_MODE || isPremium;
+  
   const query = useQuery({
-    queryKey: ['smart-recommendations', userAnimes?.length, isPremium],
+    queryKey: ['smart-recommendations', userAnimes?.length, shouldFetchRecommendations],
     queryFn: async () => {
       console.log('=== INICIANDO BUSCA DE RECOMENDAÇÕES ===');
       console.log('Premium:', isPremium);
+      console.log('Dev Mode:', DEV_MODE);
+      console.log('Should fetch:', shouldFetchRecommendations);
       console.log('Total de animes do usuário:', userAnimes?.length || 0);
       
-      if (!isPremium) {
-        console.log('Usuário não é premium, retornando dados vazios');
+      if (!shouldFetchRecommendations) {
+        console.log('Usuário não é premium e dev mode está desabilitado, retornando dados vazios');
         return {
           recommendations: [],
           trendingAnimes: [],
