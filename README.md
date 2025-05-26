@@ -188,19 +188,6 @@ O SoloAnimeList utiliza um modelo **freemium** que oferece funcionalidades bási
 
 **Total mensal estimado:** R$ 300-500
 
-### 🚀 Roadmap de Crescimento
-
-#### 🎯 Fase 1 (0-6 meses): MVP & Validação
-- ✅ Produto funcional com features básicas
-- ✅ Primeiros 500 usuários orgânicos
-- ✅ Validação do product-market fit
-- ✅ Sistema de pagamento implementado
-
-#### 📈 Fase 2 (6-12 meses): Escala
-- 🎯 5.000 usuários registrados
-- 🎯 200+ usuários premium
-- 🎯 Lançamento do app mobile
-- 🎯 Parcerias com influenciadores
 ### 🎉 Vantagem Competitiva
 
 **Diferenciais do SoloAnimeList:**
@@ -436,31 +423,3 @@ Hooks: O useAnimeLists busca e gerencia os dados
    ```bash
 npm run dev
 ```
-
-## 💎 Recursos Premium
-
-- ✅ Recomendações inteligentes baseadas em IA
-- ✅ Avatares exclusivos desbloqueáveis
-- ✅ Análise avançada de compatibilidade
-- ✅ Filtros por gênero nas recomendações
-- ✅ Animes trending atualizados
-- ✅ Sistema de conquistas completo
-- ✅ Backup na nuvem
-- ✅ Experiência sem anúncios
-
-## 📊 APIs e Rate Limits
-
-### Jikan API (MyAnimeList)
-- **Base URL**: `https://api.jikan.moe/v4`
-- **Rate Limit**: 3 requests/segundo, 60 requests/minuto
-- **Implementação**: Rate limiting com delay de 300ms entre requests
-- **Endpoints principais**:
-  - `/anime?q={query}` - Busca de animes
-  - `/anime?genres={id}` - Animes por gênero
-  - `/top/anime` - Top animes
-
-### Stripe API
-- **Webhook handling** via Edge Functions
-- **Produtos**: Assinatura mensal R$ 19,99
-- **Portal do cliente** para autogestão
-
