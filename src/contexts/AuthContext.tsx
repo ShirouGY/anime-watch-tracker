@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,16 +32,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
 
-        if (event === 'SIGNED_IN') {
-          navigate('/dashboard');
+        if (event === 'SIGNED_IN' && session) {
+          console.log('User signed in, redirecting to dashboard');
+          // Use setTimeout to avoid potential navigation conflicts
+          setTimeout(() => {
+            navigate('/dashboard', { replace: true });
+          }, 100);
         } else if (event === 'SIGNED_OUT') {
-          navigate('/login');
+          console.log('User signed out, redirecting to login');
+          navigate('/login', { replace: true });
         }
       }
     );
 
     // Then check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session);
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
@@ -79,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: `${window.location.origin}/anime-watch-tracker/dashboard`,
         },
       });
 
