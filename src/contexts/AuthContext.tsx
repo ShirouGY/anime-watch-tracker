@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,6 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('Auth state change:', event, session);
         setSession(session);
         setUser(session?.user ?? null);
 
@@ -74,18 +74,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGoogle = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      console.log('Iniciando login com Google...');
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/dashboard`,
         },
       });
 
-      if (error) throw error;
+      console.log('Resposta do Google OAuth:', data, error);
+
+      if (error) {
+        console.error('Erro no Google OAuth:', error);
+        throw error;
+      }
+
+      // Note: O redirecionamento acontece automaticamente, não mostramos toast aqui
     } catch (error: any) {
+      console.error('Erro completo no Google login:', error);
+      
+      let errorMessage = "Ocorreu um erro durante a autenticação com Google";
+      
+      if (error.message?.includes('Invalid login credentials')) {
+        errorMessage = "Credenciais de login inválidas. Verifique sua configuração do Google OAuth.";
+      } else if (error.message?.includes('signup disabled')) {
+        errorMessage = "Cadastro desabilitado. Entre em contato com o administrador.";
+      } else if (error.message?.includes('Invalid redirect URL')) {
+        errorMessage = "URL de redirecionamento inválida. Verifique a configuração no Supabase.";
+      }
+      
       toast({
         title: "Erro ao fazer login com Google",
-        description: error.message || "Ocorreu um erro durante a autenticação",
+        description: errorMessage,
         variant: "destructive",
       });
       throw error;
