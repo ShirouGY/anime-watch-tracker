@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { AddAnimeDialog } from "@/components/AddAnimeDialog";
+import { ThemeSwitch } from "@/components/ThemeSwitch";
 
 export function AppSidebar() {
   const location = useLocation();
@@ -53,7 +54,6 @@ export function AppSidebar() {
     },
   ];
 
-  {/* Renderiza o sidebar */}
   return (
     <Sidebar className="border-r">
       <SidebarHeader className="flex justify-center items-center py-6">
@@ -119,6 +119,11 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      
+      {/* Footer com o switch de tema */}
+      <SidebarFooter className="border-t border-sidebar-border">
+        <ThemeSwitch />
+      </SidebarFooter>
     </Sidebar>
   );
 }
