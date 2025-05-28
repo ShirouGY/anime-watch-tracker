@@ -40,11 +40,22 @@ export function ThemeSwitch() {
 
   return (
     <div className="flex items-center gap-3 p-2">
-      {/* Olho animado */}
-      <div className="relative w-8 h-8 flex items-center justify-center">
+      {/* Switch customizado com olhos no thumb */}
+      <div className="relative">
+        <Switch
+          checked={isDark}
+          onCheckedChange={toggleTheme}
+          className={cn(
+            "transition-all duration-300 relative",
+            isDark ? "data-[state=checked]:bg-red-600" : "data-[state=checked]:bg-blue-500"
+          )}
+        />
+        
+        {/* Olho customizado sobreposto ao thumb */}
         <div 
           className={cn(
-            "w-6 h-6 rounded-full transition-all duration-1000 relative overflow-hidden",
+            "absolute top-1/2 transform -translate-y-1/2 pointer-events-none transition-all duration-300 w-5 h-5 rounded-full overflow-hidden",
+            isDark ? "left-6" : "left-0.5",
             isDark 
               ? "bg-gradient-to-r from-red-600 to-red-800 shadow-lg shadow-red-500/50" 
               : "bg-gradient-to-r from-blue-400 to-cyan-300 shadow-lg shadow-blue-400/50",
@@ -113,16 +124,6 @@ export function ThemeSwitch() {
           />
         </div>
       </div>
-      
-      {/* Switch */}
-      <Switch
-        checked={isDark}
-        onCheckedChange={toggleTheme}
-        className={cn(
-          "transition-all duration-300",
-          isDark ? "data-[state=checked]:bg-red-600" : "data-[state=checked]:bg-blue-500"
-        )}
-      />
       
       {/* Label */}
       <span className="text-sm font-medium text-sidebar-foreground/70">
