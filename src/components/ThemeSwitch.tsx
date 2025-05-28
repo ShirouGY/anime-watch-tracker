@@ -54,8 +54,8 @@ export function ThemeSwitch() {
         {/* Olho customizado sobreposto ao thumb */}
         <div 
           className={cn(
-            "absolute top-1/2 transform -translate-y-1/2 pointer-events-none transition-all duration-300 w-5 h-5 rounded-full overflow-hidden",
-            isDark ? "left-6" : "left-0.5",
+            "absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 w-4 h-4 rounded-full overflow-hidden flex items-center justify-center",
+            isDark ? "left-[34px]" : "left-[10px]",
             isDark 
               ? "bg-gradient-to-r from-red-600 to-red-800 shadow-lg shadow-red-500/50" 
               : "bg-gradient-to-r from-blue-400 to-cyan-300 shadow-lg shadow-blue-400/50",
@@ -65,10 +65,10 @@ export function ThemeSwitch() {
           {/* Pupila central */}
           <div 
             className={cn(
-              "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-1000",
+              "rounded-full transition-all duration-1000 flex-shrink-0",
               isDark 
-                ? "w-2 h-2 bg-black" 
-                : "w-1.5 h-1.5 bg-white",
+                ? "w-1.5 h-1.5 bg-black" 
+                : "w-1 h-1 bg-white",
               isAnimating && "animate-spin"
             )}
           />
@@ -78,19 +78,19 @@ export function ThemeSwitch() {
             <>
               <div 
                 className={cn(
-                  "absolute top-1 left-1/2 transform -translate-x-1/2 w-0.5 h-1.5 bg-black rounded-full transition-all duration-1000",
+                  "absolute top-0.5 left-1/2 transform -translate-x-1/2 w-0.5 h-1 bg-black rounded-full transition-all duration-1000",
                   isAnimating && "animate-pulse"
                 )}
               />
               <div 
                 className={cn(
-                  "absolute bottom-1 left-1/4 transform w-0.5 h-1 bg-black rounded-full transition-all duration-1000",
+                  "absolute bottom-0.5 left-1/4 transform w-0.5 h-0.5 bg-black rounded-full transition-all duration-1000",
                   isAnimating && "animate-pulse"
                 )}
               />
               <div 
                 className={cn(
-                  "absolute bottom-1 right-1/4 transform w-0.5 h-1 bg-black rounded-full transition-all duration-1000",
+                  "absolute bottom-0.5 right-1/4 transform w-0.5 h-0.5 bg-black rounded-full transition-all duration-1000",
                   isAnimating && "animate-pulse"
                 )}
               />
@@ -102,13 +102,13 @@ export function ThemeSwitch() {
             <>
               <div 
                 className={cn(
-                  "absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-all duration-1000",
+                  "absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-all duration-1000",
                   isAnimating && "animate-pulse"
                 )}
               />
               <div 
                 className={cn(
-                  "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-0.5 bg-white/50 rounded-full transition-all duration-1000",
+                  "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2.5 h-0.5 bg-white/60 rounded-full transition-all duration-1000",
                   isAnimating && "animate-pulse"
                 )}
               />
@@ -118,7 +118,7 @@ export function ThemeSwitch() {
           {/* Brilho nos olhos */}
           <div 
             className={cn(
-              "absolute top-1 right-1 w-1 h-1 bg-white/80 rounded-full transition-all duration-1000",
+              "absolute top-0.5 right-0.5 w-0.5 h-0.5 bg-white/90 rounded-full transition-all duration-1000",
               isAnimating && "animate-ping"
             )}
           />
