@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export type AnimeStatus = 'watching' | 'completed' | 'plan_to_watch';
 
@@ -20,7 +21,7 @@ export interface Anime {
   user_id: string;
 }
 
-{/* Busca listas de animes para o usuário atual */}
+// Busca listas de animes para o usuário atual
 export const useAnimeLists = (status?: AnimeStatus) => {
   return useQuery({
     queryKey: ['anime-lists', status],
@@ -44,7 +45,7 @@ export const useAnimeLists = (status?: AnimeStatus) => {
   });
 };
 
-{/* Adiciona um novo anime à lista */}
+// Adiciona um novo anime à lista
 export const useAddAnime = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -70,7 +71,11 @@ export const useAddAnime = () => {
       return data;
     },
     onSuccess: (data) => {
+      // Invalida a cache das listas de anime
       queryClient.invalidateQueries({ queryKey: ['anime-lists'] });
+      // Invalida a cache das recomendações para forçar atualização
+      queryClient.invalidateQueries({ queryKey: ['smart-recommendations'] });
+      
       toast({
         title: "Anime adicionado",
         description: `${data.title} foi adicionado à sua lista.`,
@@ -86,7 +91,7 @@ export const useAddAnime = () => {
   });
 };
 
-{/* Atualiza um anime na lista */}
+// Atualiza um anime na lista
 export const useUpdateAnime = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -107,7 +112,11 @@ export const useUpdateAnime = () => {
       return data;
     },
     onSuccess: (data) => {
+      // Invalida a cache das listas de anime
       queryClient.invalidateQueries({ queryKey: ['anime-lists'] });
+      // Invalida a cache das recomendações para forçar atualização
+      queryClient.invalidateQueries({ queryKey: ['smart-recommendations'] });
+      
       toast({
         title: "Anime atualizado",
         description: `${data.title} foi atualizado.`,
@@ -123,7 +132,7 @@ export const useUpdateAnime = () => {
   });
 };
 
-{/* Remove um anime da lista */}
+// Remove um anime da lista
 export const useDeleteAnime = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -142,7 +151,11 @@ export const useDeleteAnime = () => {
       return animeId;
     },
     onSuccess: (_data, variables, context) => {
+      // Invalida a cache das listas de anime
       queryClient.invalidateQueries({ queryKey: ['anime-lists'] });
+      // Invalida a cache das recomendações para forçar atualização
+      queryClient.invalidateQueries({ queryKey: ['smart-recommendations'] });
+      
       toast({
         description: "Anime removido da sua lista.",
       });
@@ -156,6 +169,3 @@ export const useDeleteAnime = () => {
     },
   });
 };
-
-{/* Importa o hook de autenticação */}
-import { useAuth } from '@/contexts/AuthContext';
