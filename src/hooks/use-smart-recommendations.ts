@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { useAnimeLists } from './use-anime-lists';
 
@@ -19,17 +20,17 @@ interface RecommendationAnime {
 
 const JIKAN_API_BASE = 'https://api.jikan.moe/v4';
 
-{/* Modo de desenvolvimento - pode ser ativado para teste */}
-const DEV_MODE = true; {/* Temporariamente true para teste */}
+// Modo de desenvolvimento - pode ser ativado para teste
+const DEV_MODE = true; // Temporariamente true para teste
 
 async function fetchRecommendationsByGenre(genres: string[]): Promise<RecommendationAnime[]> {
   console.log('Buscando recomendações para gêneros:', genres);
   const recommendations: RecommendationAnime[] = [];
   
-  {/* Para cada gênero, busca animes populares */}
-  for (const genre of genres.slice(0, 3)) { {/* Limita a 3 gêneros para não sobrecarregar */}
+  // Para cada gênero, busca animes populares
+  for (const genre of genres.slice(0, 3)) { // Limita a 3 gêneros para não sobrecarregar
     try {
-      await new Promise(resolve => setTimeout(resolve, 300)); {/* Limita a 3 gêneros para não sobrecarregar */}
+      await new Promise(resolve => setTimeout(resolve, 300)); // Rate limiting
       
       const response = await fetch(
         `${JIKAN_API_BASE}/anime?genres=${genre}&order_by=score&sort=desc&limit=8&min_score=7`
@@ -57,7 +58,7 @@ async function fetchRecommendationsByGenre(genres: string[]): Promise<Recommenda
     }
   }
   
-  {/* Remove duplicatas e limita a 20 recomendações */}
+  // Remove duplicatas e limita a 20 recomendações
   const uniqueRecommendations = recommendations.reduce((acc, current) => {
     const exists = acc.find(item => item.mal_id === current.mal_id);
     if (!exists) {
@@ -128,7 +129,7 @@ function extractUserGenres(userAnimes: any[]): string[] {
   console.log('=== ANÁLISE DE GÊNEROS ===');
   console.log('Animes do usuário recebidos:', userAnimes?.length || 0);
   
-  {/* Mesmo com poucos animes, tenta extrair gêneros */}
+  // Mesmo com poucos animes, tenta extrair gêneros
   if (!userAnimes || userAnimes.length === 0) {
     console.log('Usuário não tem animes, usando gêneros populares');
     return ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Romance'];
@@ -136,7 +137,7 @@ function extractUserGenres(userAnimes: any[]): string[] {
 
   const genreCount: Record<string, number> = {};
   
-  {/* Analisa cada anime do usuário */}
+  // Analisa cada anime do usuário
   userAnimes.forEach((anime, index) => {
     console.log(`Analisando anime ${index + 1}: ${anime.title}`);
     const simulatedGenres = getSimulatedGenres(anime.title);
@@ -149,7 +150,7 @@ function extractUserGenres(userAnimes: any[]): string[] {
   
   console.log('Contagem final de gêneros:', genreCount);
   
-  {/* Pega os gêneros mais frequentes */}
+  // Pega os gêneros mais frequentes
   const topGenres = Object.entries(genreCount)
     .sort(([,a], [,b]) => b - a)
     .slice(0, 6) // Aumenta para 6 gêneros
@@ -157,7 +158,7 @@ function extractUserGenres(userAnimes: any[]): string[] {
     
   console.log('Top gêneros selecionados:', topGenres);
   
-  {/* Garante pelo menos 3 gêneros mesmo com poucos animes */}
+  // Garante pelo menos 3 gêneros mesmo com poucos animes
   const fallbackGenres = ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Romance'];
   while (topGenres.length < 3) {
     const nextGenre = fallbackGenres.find(genre => !topGenres.includes(genre));
@@ -176,7 +177,7 @@ function getSimulatedGenres(title: string): string[] {
   const lowerTitle = title.toLowerCase();
   const genres: string[] = [];
   
-  {/* Análise mais abrangente de gêneros */}
+  // Análise mais abrangente de gêneros
   if (lowerTitle.includes('love') || lowerTitle.includes('heart') || lowerTitle.includes('romance') || lowerTitle.includes('koi')) {
     genres.push('Romance');
   }
@@ -214,35 +215,52 @@ function getSimulatedGenres(title: string): string[] {
     genres.push('Drama');
   }
   
-  {/* Se não encontrou gêneros específicos, adiciona baseado em padrões */}
+  // Se não encontrou gêneros específicos, adiciona baseado em padrões
   if (genres.length === 0) {
-    {/* Tenta identificar por palavras-chave comuns em animes */}
+    // Tenta identificar por palavras-chave comuns em animes
     if (lowerTitle.includes('no') || lowerTitle.includes('wa') || lowerTitle.includes('ga')) {
-      genres.push('Drama', 'Comedy'); {/* Animes japoneses típicos */}
+      genres.push('Drama', 'Comedy'); // Animes japoneses típicos
     } else if (lowerTitle.includes('attack') || lowerTitle.includes('titan') || lowerTitle.includes('kill')) {
       genres.push('Action', 'Drama');
     } else {
-      genres.push('Adventure', 'Comedy'); {/* Fallback padrão */}
+      genres.push('Adventure', 'Comedy'); // Fallback padrão
     }
   }
   
   return genres;
 }
 
+// Função para criar uma chave única baseada nos títulos dos animes
+function createUserAnimesKey(userAnimes: any[]): string {
+  if (!userAnimes || userAnimes.length === 0) return 'empty';
+  
+  // Cria uma chave baseada nos títulos dos animes ordenados
+  const titles = userAnimes
+    .map(anime => anime.title)
+    .sort()
+    .join('|');
+    
+  return btoa(titles).slice(0, 20); // Encoda em base64 e pega os primeiros 20 chars
+}
+
 export function useSmartRecommendations(isPremium: boolean) {
   const { data: userAnimes } = useAnimeLists();
   
-  {/* Em modo de desenvolvimento, sempre permitir recomendações */}
+  // Em modo de desenvolvimento, sempre permitir recomendações
   const shouldFetchRecommendations = DEV_MODE || isPremium;
   
+  // Cria uma chave única baseada no conteúdo real dos animes
+  const userAnimesKey = createUserAnimesKey(userAnimes || []);
+  
   const query = useQuery({
-    queryKey: ['smart-recommendations', userAnimes?.length, shouldFetchRecommendations],
+    queryKey: ['smart-recommendations', userAnimesKey, shouldFetchRecommendations],
     queryFn: async () => {
       console.log('=== INICIANDO BUSCA DE RECOMENDAÇÕES ===');
       console.log('Premium:', isPremium);
       console.log('Dev Mode:', DEV_MODE);
       console.log('Should fetch:', shouldFetchRecommendations);
       console.log('Total de animes do usuário:', userAnimes?.length || 0);
+      console.log('Chave dos animes do usuário:', userAnimesKey);
       
       if (!shouldFetchRecommendations) {
         console.log('Usuário não é premium e dev mode está desabilitado, retornando dados vazios');
@@ -265,15 +283,15 @@ export function useSmartRecommendations(isPremium: boolean) {
         recommendations = await fetchRecommendationsByGenre(userGenres);
         console.log('Recomendações encontradas por gênero:', recommendations.length);
         
-        {/* Sempre busca animes populares para complementar */}
+        // Sempre busca animes populares para complementar
         console.log('=== COMPLEMENTANDO COM ANIMES POPULARES ===');
         const popularAnimes = await fetchPopularAnimes();
         console.log('Animes populares encontrados:', popularAnimes.length);
         
-        {/* Combina recomendações por gênero com populares */}
+        // Combina recomendações por gênero com populares
         const allRecommendations = [...recommendations, ...popularAnimes];
         
-        {/* Remove duplicatas */}
+        // Remove duplicatas
         recommendations = allRecommendations.reduce((acc, current) => {
           const exists = acc.find(item => item.mal_id === current.mal_id);
           if (!exists) {
@@ -284,7 +302,7 @@ export function useSmartRecommendations(isPremium: boolean) {
         
         console.log('Total após combinar e remover duplicatas:', recommendations.length);
         
-        {/* Remove animes que o usuário já tem na lista */}
+        // Remove animes que o usuário já tem na lista
         if (userAnimes && userAnimes.length > 0) {
           const userAnimeIds = userAnimes.map(anime => anime.anime_id);
           const beforeFilter = recommendations.length;
@@ -297,12 +315,12 @@ export function useSmartRecommendations(isPremium: boolean) {
         
       } catch (error) {
         console.error('Erro ao buscar recomendações:', error);
-        {/* Em caso de erro, busca animes populares como fallback */}
+        // Em caso de erro, busca animes populares como fallback
         recommendations = await fetchPopularAnimes();
         console.log('Usando fallback - animes populares:', recommendations.length);
       }
 
-      {/* Extrai gêneros das recomendações e trending */}
+      // Extrai gêneros das recomendações e trending
       const allGenres = new Set<string>();
       [...recommendations, ...trendingAnimes].forEach(anime => {
         anime.genres.forEach(genre => {
@@ -322,7 +340,7 @@ export function useSmartRecommendations(isPremium: boolean) {
       };
     },
     enabled: true,
-    staleTime: 1000 * 60 * 30, // 30 minutos
+    staleTime: 1000 * 60 * 5, // Reduzido para 5 minutos para testes
     refetchOnWindowFocus: false,
   });
 
