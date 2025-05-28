@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const RecommendationsPage = () => {
   const { user, session } = useAuth();
-  const { subscriptionData, isLoading: subscriptionLoading, checkSubscription } = useSubscription();
+  const { subscriptionData, isLoading: subscriptionLoading, checkSubscription, createCheckout } = useSubscription();
   const { toast } = useToast();
   const [selectedGenre, setSelectedGenre] = useState<string>("");
   
@@ -121,9 +122,13 @@ const RecommendationsPage = () => {
             <Button onClick={checkSubscription} variant="outline">
               Verificar Status Premium
             </Button>
-            <Button onClick={() => window.location.href = '/perfil'} className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600">
+            <Button 
+              onClick={createCheckout}
+              disabled={subscriptionLoading}
+              className="bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600"
+            >
               <Crown className="h-4 w-4 mr-2" />
-              Assinar Premium
+              {subscriptionLoading ? "Processando..." : "Assinar Premium"}
             </Button>
           </div>
           
