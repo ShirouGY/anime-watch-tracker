@@ -119,19 +119,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      
-      {/* Rodapé do sidebar */}
-      <SidebarFooter>
-        <div className="p-4">
-          <div className="flex items-center gap-2">
-            {/* Botão para abrir as configurações */}
-            <Settings size={16} className="text-muted-foreground" />
-            <Link to="/settings" className="text-xs text-muted-foreground hover:text-primary transition-colors">
-              Configurações
-            </Link>
-          </div>
-        </div>
-      </SidebarFooter>
     </Sidebar>
   );
 }
