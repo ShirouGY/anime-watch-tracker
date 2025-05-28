@@ -54,8 +54,8 @@ export function ThemeSwitch() {
         {/* Olho customizado sobreposto ao thumb */}
         <div 
           className={cn(
-            "absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 w-4 h-4 rounded-full overflow-hidden flex items-center justify-center",
-            isDark ? "left-[34px]" : "left-[10px]",
+            "absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 w-[25px] h-[25px] rounded-full overflow-hidden flex items-center justify-center",
+            isDark ? "left-[34px]" : "left-[12px]",
             isDark 
               ? "bg-gradient-to-r from-red-600 to-red-800 shadow-lg shadow-red-500/50" 
               : "bg-gradient-to-r from-blue-400 to-cyan-300 shadow-lg shadow-blue-400/50",
@@ -127,7 +127,7 @@ export function ThemeSwitch() {
       
       {/* Label */}
       <span className="text-sm font-medium text-sidebar-foreground/70">
-        {isDark ? 'Sharingan' : 'Six Eyes'}
+        {isDark ? 'Dark' : 'Light'}
       </span>
     </div>
   );
